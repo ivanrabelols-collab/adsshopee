@@ -610,6 +610,54 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
   </div>
 </div>
 
+<!-- PAGE: RAIZ -->
+<div id="page-raiz" class="pg">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div>
+      <div style="font-size:16px;font-weight:700">Produtos Raiz</div>
+      <div class="muted" style="font-size:12px;margin-top:2px">Cada raiz agrupa variações e anúncios. Ex: "Trava" → Kit 2, Kit 3 → anúncios por canal</div>
+    </div>
+    <button class="btn btn-p" onclick="openM('m-raiz')">+ Nova Raiz</button>
+  </div>
+  <div class="kpig">
+    <div class="kpi kb"><div class="kpi-l">Raízes</div><div class="kpi-v" id="rz1">—</div></div>
+    <div class="kpi kg"><div class="kpi-l">Variações</div><div class="kpi-v" id="rz2">—</div></div>
+    <div class="kpi ko"><div class="kpi-l">Valor Estoque</div><div class="kpi-v" id="rz3">R$ —</div></div>
+    <div class="kpi kp"><div class="kpi-l">Total Anúncios</div><div class="kpi-v" id="rz4">—</div></div>
+  </div>
+  <div id="raiz-lista"><div class="empty"><div class="empty-i">📦</div><p>Nenhuma raiz. Clique em + Nova Raiz.</p></div></div>
+</div>
+
+<!-- PAGE: VENDAS -->
+<div id="page-vendas" class="pg">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div><div style="font-size:16px;font-weight:700">Registro de Vendas</div><div class="muted" style="font-size:12px;margin-top:2px">Importe CSV do marketplace ou registre manualmente</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-o" onclick="openM('m-import-csv')">⬆ Importar CSV</button>
+      <button class="btn btn-p" onclick="openM('m-venda')">+ Registrar Venda</button>
+    </div>
+  </div>
+  <div class="kpig">
+    <div class="kpi kb"><div class="kpi-l">Vendas Hoje</div><div class="kpi-v" id="vd1">—</div><div class="kpi-s" id="vd1s">—</div></div>
+    <div class="kpi kg"><div class="kpi-l">Lucro Real Hoje</div><div class="kpi-v" id="vd2">R$ —</div></div>
+    <div class="kpi ko"><div class="kpi-l">Vendas no Mês</div><div class="kpi-v" id="vd3">—</div><div class="kpi-s" id="vd3s">—</div></div>
+    <div class="kpi kp"><div class="kpi-l">Lucro Real no Mês</div><div class="kpi-v" id="vd4">R$ —</div></div>
+  </div>
+  <div class="two" style="margin-bottom:16px">
+    <div class="card">
+      <div class="sh"><div class="sh-t">VPD Real vs Projetado</div><div class="sh-s">Últimos 30 dias</div></div>
+      <div id="vd-vpd"><div class="empty"><div class="empty-i">📊</div><p>Importe vendas para ver o VPD real</p></div></div>
+    </div>
+    <div class="card">
+      <div class="sh"><div class="sh-t">Vendas Recentes</div></div>
+      <div class="tw nb"><table>
+        <thead><tr><th>Produto</th><th>Canal</th><th class="tr">Qtd</th><th class="tr">Preço</th><th class="tr">Lucro</th><th>Data</th></tr></thead>
+        <tbody id="tb-vend-rec"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== CATÁLOGO ===== -->
 <div id="page-catalogo" class="pg">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
