@@ -1808,7 +1808,7 @@ function loadDemo(){
 function R(v){if(v===null||v===undefined||isNaN(v))return'—';return'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
 function expJSON(){
-  const d=JSON.stringify({v:2,produtos:window._P,anuncios:window._A},null,2);
+  const d=JSON.stringify({v:3,raiz:window._R,produtos:window._P,estoque:window._E,anuncios:window._A,vendas:window._V,clientes:window._C},null,2);
   const b=new Blob([d],{type:'application/json'});
   const u=URL.createObjectURL(b);
   const a=document.createElement('a');
@@ -1821,10 +1821,12 @@ function impJSON(e){
   r.onload=ev=>{
     try{
       const d=JSON.parse(ev.target.result);
+      if(d.raiz)window._R=d.raiz;
       if(d.produtos)window._P=d.produtos;
-      // backward compat: estoque antigo
-      if(d.estoque)Object.values(d.estoque).forEach(e=>{if(!window._P[e.id]){window._P[e.id]=e;}});
+      if(d.estoque)Object.values(d.estoque).forEach(e=>{if(!window._P[e.id])window._P[e.id]=e;});
       if(d.anuncios)window._A=d.anuncios;
+      if(d.vendas)window._V=d.vendas;
+      if(d.clientes)window._C=d.clientes;
       renderAll();alert('Dados importados com sucesso!');
     }catch{alert('Erro ao ler arquivo JSON');}
   };r.readAsText(f);
