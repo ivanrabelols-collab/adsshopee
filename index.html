@@ -2419,7 +2419,7 @@ function renderVendas(){
 // CSV Import
 const CSV_INST={
   ml:'<strong>Mercado Livre:</strong> Minha conta → Vendas → Resumo das vendas → Gerar Excel → baixe o <strong>.xlsx</strong>. O sistema lê automaticamente a aba "Vendas BR" (cabeçalho na linha 6).',
-  shopee:'<strong>Shopee:</strong> Central do Vendedor → Meus Relatórios → Pedidos → Exportar CSV. Colunas: Nome do Produto, Quantidade, Preço Acordado.',
+  shopee:'<strong>Shopee:</strong> Central do Vendedor → Meus Pedidos → Exportar → baixe o <strong>.xlsx</strong>. O sistema detecta automaticamente o formato Shopee.',
   tiktok:'<strong>TikTok Shop:</strong> Seller Center → Pedidos → Exportar. Colunas: Product Name, Quantity, Order Amount.'
 };
 let _csvParsed=[],_csvTipo='ml';
@@ -2439,7 +2439,7 @@ function csvFileSelected(e){const f=e.target.files[0];if(!f)return;
   const ext=f.name.split('.').pop().toLowerCase();
   if(ext==='xlsx'||ext==='xls'){parseXLSX(f);}else{parseCSV(f);}
 }
-// ---- XLSX IMPORT (Mercado Livre) via JSZip ----
+// ---- XLSX IMPORT (ML + Shopee) via JSZip ----
 function parseXLSX(file){
   const statusEl = document.getElementById('csv-status');
   const dropEl   = document.getElementById('csv-drop');
@@ -2447,7 +2447,7 @@ function parseXLSX(file){
   if(dropEl)   dropEl.style.opacity = '0.5';
 
   if(typeof JSZip === 'undefined'){
-    showCsvErr('JSZip não carregado. Verifique a conexão e recarregue a página.'); return;
+    showCsvErr('JSZip não carregado. Recarregue a página.'); return;
   }
 
   const reader = new FileReader();
@@ -2455,112 +2455,158 @@ function parseXLSX(file){
     try {
       const zip = await JSZip.loadAsync(ev.target.result);
 
-      // Ler shared strings (textos)
-      const ssXml  = await zip.file('xl/sharedStrings.xml').async('text');
+      // Ler shared strings
+      const ssFile = zip.file('xl/sharedStrings.xml');
       const strings = [];
-      const siRe = /<si>[\s\S]*?<\/si>/g;
-      const tRe  = /<t[^>]*>([^<]*)<\/t>/g;
-      let sm;
-      while((sm = siRe.exec(ssXml)) !== null){
-        let val = '';
-        let tm;
-        const inner = sm[0];
-        while((tm = tRe.exec(inner)) !== null) val += tm[1];
-        strings.push(val);
+      if(ssFile){
+        const ssXml = await ssFile.async('text');
+        const siRe = /<si>[\s\S]*?<\/si>/g;
+        let sm;
+        while((sm = siRe.exec(ssXml)) !== null){
+          let val = '';
+          const tRe2 = /<t[^>]*>([^<]*)<\/t>/g;
+          let tm;
+          while((tm = tRe2.exec(sm[0])) !== null) val += tm[1];
+          strings.push(val);
+        }
       }
 
-      // Ler sheet 1 (Vendas BR)
+      // Ler sheet1
       const sheetFiles = Object.keys(zip.files).filter(f => f.match(/xl\/worksheets\/sheet\d+\.xml/));
       const sheetXml = await zip.file(sheetFiles[0]).async('text');
 
-      // Parsear rows
-      const rowRe = /<row[^>]*r="(\d+)"[^>]*>([\s\S]*?)<\/row>/g;
-      const cellRe = /<c r="([A-Z]+)(\d+)"[^>]*(?:t="([^"]*)")?[^>]*>[\s\S]*?<v>([^<]*)<\/v>[\s\S]*?<\/c>/g;
-
-      // Converter letra de coluna para índice 0-based
+      // Converter col letters -> 0-based index
       function colIdx(letters){
         let n = 0;
-        for(let i = 0; i < letters.length; i++) n = n * 26 + (letters.charCodeAt(i) - 64);
-        return n - 1;
+        for(let i=0;i<letters.length;i++) n = n*26 + (letters.charCodeAt(i)-64);
+        return n-1;
       }
 
+      // Parsear todas as linhas
       const allRows = {};
+      const rowRe = /<row[^>]*r="(\d+)"[^>]*>([\s\S]*?)<\/row>/g;
       let rm;
       while((rm = rowRe.exec(sheetXml)) !== null){
         const rowNum = parseInt(rm[1]);
-        const rowContent = rm[2];
         const cells = {};
-        let cm;
         const cellRe2 = /<c r="([A-Z]+)\d+"[^>]*(?:t="([^"]*)")?[^>]*>(?:[\s\S]*?<v>([^<]*)<\/v>)?[\s\S]*?<\/c>/g;
-        while((cm = cellRe2.exec(rowContent)) !== null){
-          const col   = colIdx(cm[1]);
-          const type  = cm[2] || '';
-          const raw   = cm[3] || '';
+        let cm;
+        while((cm = cellRe2.exec(rm[2])) !== null){
+          const col  = colIdx(cm[1]);
+          const type = cm[2]||'';
+          const raw  = cm[3]||'';
           let val;
-          if(type === 's')      val = strings[parseInt(raw)] || '';
-          else if(type === 'str') val = raw;
-          else                   val = raw === '' ? '' : parseFloat(raw);
+          if(type==='s')       val = strings[parseInt(raw)]||'';
+          else if(type==='str') val = raw;
+          else                  val = raw===''?'':parseFloat(raw);
           cells[col] = val;
         }
         allRows[rowNum] = cells;
       }
 
-      // Índices fixos confirmados para planilha ML 2024-2026
-      // Linha 6 (rowNum=6) = headers, dados a partir de rowNum=7
-      const I_TITULO   = 24;  // Título do anúncio
-      const I_QTD      = 7;   // Unidades
-      const I_PRECO_UN = 26;  // Preço unitário de venda (BRL)
-      const I_TOTAL    = 18;  // Total (BRL) — líquido após taxas ML
-      const I_DATA     = 1;   // Data da venda
-      const I_SKU      = 21;  // SKU
+      // ---- DETECTAR FORMATO ----
+      // ML: header na linha 6, col 24 = "Título do anúncio"
+      // Shopee: header na linha 1, col 12 = "Nome do Produto"
+      const row1 = allRows[1]||{};
+      const row6 = allRows[6]||{};
 
-      const meses = {
-        janeiro:'01',fevereiro:'02',marco:'03',abril:'04',maio:'05',junho:'06',
-        julho:'07',agosto:'08',setembro:'09',outubro:'10',novembro:'11',dezembro:'12'
-      };
+      let formato = null;
+      // Checar se é Shopee (linha 1 tem "Nome do Produto" na col 12)
+      if(String(row1[12]||'').toLowerCase().includes('nome do produto') ||
+         String(row1[0]||'').toLowerCase().includes('id do pedido')){
+        formato = 'shopee';
+      }
+      // Checar se é ML (linha 6 tem "Título do anúncio" na col 24)
+      else if(String(row6[24]||'').toLowerCase().includes('anuncio') ||
+              String(row6[24]||'').toLowerCase().includes('anúncio') ||
+              String(row6[0]||'').toLowerCase().includes('venda')){
+        formato = 'ml';
+      }
+      // Fallback: checar linha 1 col 0
+      else if(String(row1[0]||'').toLowerCase().includes('titulo') ||
+              String(row1[0]||'').toLowerCase().includes('título')){
+        formato = 'shopee_csv_style';
+      } else {
+        formato = 'ml'; // default
+      }
+
+      console.log('Formato detectado:', formato);
+
+      const meses = {janeiro:'01',fevereiro:'02',marco:'03',abril:'04',maio:'05',junho:'06',
+                     julho:'07',agosto:'08',setembro:'09',outubro:'10',novembro:'11',dezembro:'12'};
+
+      function parseData(ds){
+        ds = String(ds||'');
+        // Formato "2026-04-14 14:48" ou "2026-04-14"
+        const dm1 = ds.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if(dm1) return `${dm1[1]}-${dm1[2]}-${dm1[3]}`;
+        // Formato "14 de abril de 2026 20:24 hs."
+        const dm2 = ds.match(/(\d+)\s+de\s+(\w+)\s+de\s+(\d{4})/i);
+        if(dm2){
+          const mesKey = dm2[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+          return `${dm2[3]}-${meses[mesKey]||'01'}-${dm2[1].padStart(2,'0')}`;
+        }
+        return new Date().toISOString().slice(0,10);
+      }
 
       _csvParsed = [];
       const unmapped = [];
-      const rowNums  = Object.keys(allRows).map(Number).filter(n => n >= 7).sort((a,b)=>a-b);
 
-      rowNums.forEach(rn => {
-        const row = allRows[rn];
-        const titulo = String(row[I_TITULO] || '').trim();
-        if(!titulo) return;
+      if(formato === 'ml'){
+        // ML: header linha 6, dados linha 7+
+        // Col 24=título, 7=qtd, 26=preçoUn, 18=totalLiq, 1=data, 21=sku
+        const rowNums = Object.keys(allRows).map(Number).filter(n=>n>=7).sort((a,b)=>a-b);
+        rowNums.forEach(rn=>{
+          const row = allRows[rn];
+          const titulo = String(row[24]||'').trim();
+          if(!titulo) return;
+          const qtd      = parseFloat(row[7])||1;
+          const precoUn  = parseFloat(row[26])||0;
+          const totalLiq = parseFloat(row[18])||0;
+          const data     = parseData(row[1]);
+          const sku      = String(row[21]||'');
+          const canal    = 'MERCADO LIVRE';
+          const best = Object.values(window._P).map(p=>({p,s:scoreMatch(titulo,p)})).sort((a,b)=>b.s.score-a.s.score)[0];
+          const matched = best&&best.s.score>=25?best.p:null;
+          if(!matched) unmapped.push(titulo);
+          _csvParsed.push({titulo,qtd,preco:precoUn,totalLiq,data,canal,matched,score:best?best.s.score:0,sku});
+        });
 
-        const qtd      = parseFloat(row[I_QTD])      || 1;
-        const precoUn  = parseFloat(row[I_PRECO_UN]) || 0;
-        const totalLiq = parseFloat(row[I_TOTAL])    || 0;
-        const sku      = String(row[I_SKU] || '');
+      } else {
+        // SHOPEE: header linha 1, dados linha 2+
+        // Col 12=SKU principal, 13=Nome produto, 14=SKU variação, 17=preço acordado
+        // Col 18=qtd, 46=Total global (líquido), 10=data criação
+        const rowNums = Object.keys(allRows).map(Number).filter(n=>n>=2).sort((a,b)=>a-b);
+        rowNums.forEach(rn=>{
+          const row = allRows[rn];
+          const titulo = String(row[13]||row[12]||'').trim();
+          if(!titulo) return;
+          const qtd      = parseFloat(row[18])||1;
+          const precoUn  = parseFloat(row[17])||0;
+          // Shopee col 46 = Total global (valor que entra no caixa)
+          // Taxa comissão (col 43) + taxa serviço (col 45) já descontadas
+          const totalGlobal = parseFloat(row[46])||0;
+          const comissao    = parseFloat(row[43])||0;
+          const servico     = parseFloat(row[45])||0;
+          // totalLiq = o que sobra após taxas Shopee
+          const totalLiq = totalGlobal - comissao - servico;
+          const data     = parseData(row[10]);
+          const skuVar   = String(row[14]||'');
+          const canal    = 'SHOPEE';
+          const best = Object.values(window._P).map(p=>({p,s:scoreMatch(titulo,p)})).sort((a,b)=>b.s.score-a.s.score)[0];
+          const matched = best&&best.s.score>=25?best.p:null;
+          if(!matched) unmapped.push(titulo);
+          _csvParsed.push({titulo,qtd,preco:precoUn,totalLiq,data,canal,matched,score:best?best.s.score:0,sku:skuVar});
+        });
+      }
 
-        // Parsear data "14 de abril de 2026 20:24 hs."
-        let data = new Date().toISOString().slice(0,10);
-        const ds = String(row[I_DATA] || '');
-        const dm = ds.match(/(\d+)\s+de\s+(\w+)\s+de\s+(\d{4})/i);
-        if(dm){
-          const mesKey = dm[2].toLowerCase()
-            .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-          const mes = meses[mesKey] || '01';
-          data = dm[3] + '-' + mes + '-' + dm[1].padStart(2,'0');
-        }
-
-        const canal = 'MERCADO LIVRE';
-        const best  = Object.values(window._P)
-          .map(p => ({p, s: scoreMatch(titulo, p)}))
-          .sort((a,b) => b.s.score - a.s.score)[0];
-        const matched = best && best.s.score >= 25 ? best.p : null;
-        if(!matched) unmapped.push(titulo);
-
-        _csvParsed.push({titulo, qtd, preco: precoUn, totalLiq, data, canal, matched, score: best ? best.s.score : 0, sku});
-      });
-
-      if(dropEl) dropEl.style.opacity = '1';
+      if(dropEl) dropEl.style.opacity='1';
       _renderCsvPreview(unmapped);
 
-    } catch(e) {
-      console.error('parseXLSX erro:', e);
-      if(dropEl) dropEl.style.opacity = '1';
-      showCsvErr('Erro ao ler planilha: ' + e.message);
+    }catch(e){
+      console.error('parseXLSX erro:',e);
+      if(dropEl) dropEl.style.opacity='1';
+      showCsvErr('Erro ao ler planilha: '+e.message);
     }
   };
   reader.readAsArrayBuffer(file);
@@ -3009,7 +3055,7 @@ document.addEventListener("DOMContentLoaded", function(){
     <div class="drop-zone" id="csv-drop" onclick="document.getElementById('csv-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="csvDrop(event)">
       <div style="font-size:24px;margin-bottom:6px">📂</div>
       <div style="font-weight:600;font-size:13px;color:#2D3748">Arraste o arquivo CSV aqui ou clique para selecionar</div>
-      <div style="font-size:11px;color:#A0AEC0;margin-top:4px">Formatos: .xlsx (Mercado Livre), .csv, .txt (Shopee / TikTok)</div>
+      <div style="font-size:11px;color:#A0AEC0;margin-top:4px">Formatos: .xlsx (ML e Shopee detectados automaticamente), .csv (TikTok)</div>
     </div>
     <input type="file" id="csv-file" accept=".csv,.txt,.xlsx,.xls" style="display:none" onchange="csvFileSelected(event)">
     <div id="csv-preview" style="display:none">
