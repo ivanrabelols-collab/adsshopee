@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DL Gestão ERP</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>window._R={};window._P={};window._E={};window._A={};window._V={};</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -615,13 +616,13 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <div>
       <div style="font-size:16px;font-weight:700">Produtos Raiz</div>
-      <div class="muted" style="font-size:12px;margin-top:2px">Cada raiz agrupa variações e anúncios. Ex: "Trava" → Kit 2, Kit 3 → anúncios por canal</div>
+      <div class="muted" style="font-size:12px;margin-top:2px">Cada produto do estoque agrupa seus anúncios. Clique para expandir e ver/editar anúncios.</div>
     </div>
-    <button class="btn btn-p" onclick="openM('m-raiz')">+ Nova Raiz</button>
+    <div style="display:flex;gap:8px"><button class="btn btn-g" onclick="openM('m-raiz')">+ Nova Família</button><button class="btn btn-p" onclick="openM('m-prod')">+ Novo Produto</button></div>
   </div>
   <div class="kpig">
-    <div class="kpi kb"><div class="kpi-l">Raízes</div><div class="kpi-v" id="rz1">—</div></div>
-    <div class="kpi kg"><div class="kpi-l">Variações</div><div class="kpi-v" id="rz2">—</div></div>
+    <div class="kpi kb"><div class="kpi-l" id="rz1-l">Produtos</div><div class="kpi-v" id="rz1">—</div></div>
+    <div class="kpi kg"><div class="kpi-l" id="rz2-l">Anúncios</div><div class="kpi-v" id="rz2">—</div></div>
     <div class="kpi ko"><div class="kpi-l">Valor Estoque</div><div class="kpi-v" id="rz3">R$ —</div></div>
     <div class="kpi kp"><div class="kpi-l">Total Anúncios</div><div class="kpi-v" id="rz4">—</div></div>
   </div>
@@ -2061,72 +2062,197 @@ function delRaiz(id){
 // renderRaiz
 function renderRaiz(){
   if(!document.getElementById('raiz-lista'))return;
-  const raizes=Object.values(window._R),prods=Object.values(window._P),anuncs=Object.values(window._A);
-  const rz1=document.getElementById('rz1');if(rz1)rz1.textContent=raizes.length;
-  const rz2=document.getElementById('rz2');if(rz2)rz2.textContent=prods.length;
-  const rz3=document.getElementById('rz3');if(rz3)rz3.textContent=R(prods.reduce((s,p)=>s+(p.total||0),0));
-  const rz4=document.getElementById('rz4');if(rz4)rz4.textContent=anuncs.length;
+  const PA=Object.values(window._P);
+  const AA=Object.values(window._A);
+  const RA=Object.values(window._R);
+
+  // KPIs
+  const rz1=document.getElementById('rz1');if(rz1)rz1.textContent=PA.length;
+  const rz2=document.getElementById('rz2');if(rz2)rz2.textContent=AA.length;
+  const rz3=document.getElementById('rz3');if(rz3)rz3.textContent=R(PA.reduce((s,p)=>s+(p.total||0),0));
+  const rz4=document.getElementById('rz4');if(rz4)rz4.textContent=AA.length;
+
+  // Atualizar labels dos KPIs
+  const l1=document.getElementById('rz1-l');if(l1)l1.textContent='Produtos';
+  const l2=document.getElementById('rz2-l');if(l2)l2.textContent='Anúncios';
+
   const el=document.getElementById('raiz-lista');if(!el)return;
-  if(!raizes.length){el.innerHTML='<div class="empty"><div class="empty-i">📦</div><p>Nenhuma raiz. Clique em + Nova Raiz.</p></div>';return;}
-  el.innerHTML=raizes.map(r=>{
-    const filhos=prods.filter(p=>p.raiz===r.id);
-    const fa=anuncs.filter(a=>filhos.some(f=>f.nome===a.produto));
-    const estT=filhos.reduce((s,p)=>s+(p.qtd||0),0),lm=fa.length?fa.reduce((s,a)=>s+(a.lucro||0),0)/fa.length:0;
-    const low=estT<=10&&estT>0;
-    return`<div class="raiz-card">
-      <div class="raiz-hd" id="rzh_${r.id}" onclick="toggleRaiz('${r.id}')">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-size:15px;font-weight:800">${r.nome}</span>
-          ${r.categoria?`<span class="badge b-gy">${r.categoria}</span>`:''}
-          <span class="badge b-bl">${filhos.length} variação${filhos.length!==1?'ões':''}</span>
-          <span class="badge b-or">${fa.length} anúncio${fa.length!==1?'s':''}</span>
-          ${low?'<span class="badge b-rd">⚠ estoque baixo</span>':''}
+  if(!PA.length){
+    el.innerHTML='<div class="empty"><div class="empty-i">📦</div><p>Nenhum produto cadastrado. Clique em + Novo Produto.</p></div>';
+    return;
+  }
+
+  // Agrupar: produtos com raiz ficam agrupados pela raiz, sem raiz ficam soltos
+  const porRaiz={};
+  PA.forEach(p=>{
+    const chave=p.raiz||'__sem_raiz__';
+    if(!porRaiz[chave])porRaiz[chave]=[];
+    porRaiz[chave].push(p);
+  });
+
+  const renderProdCard=(p)=>{
+    const anuncios=AA.filter(a=>a.produto===p.nome);
+    const low=(p.qtd||0)>0&&(p.qtd||0)<=10;
+    const zero=(p.qtd||0)===0;
+    const totalVpd=anuncios.reduce((s,a)=>s+(a.vpd||0),0);
+    const diasEst=totalVpd>0?Math.floor((p.qtd||0)/totalVpd):null;
+
+    const statusBadge=zero?'<span class="badge b-rd">⚠ Zerado</span>':
+      low?'<span class="badge b-or">⚠ Estoque baixo</span>':'';
+
+    return`<div class="raiz-card" style="margin-bottom:10px">
+      <!-- CABEÇALHO DO PRODUTO (clicável) -->
+      <div class="raiz-hd" id="rzh_p_${p.id}" onclick="toggleProdCard('${p.id}')">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1">
+          <span style="font-size:14px;font-weight:800;color:#1A202C">${p.nome}</span>
+          ${p.sku?`<span class="badge b-gy">SKU ${p.sku}</span>`:''}
+          ${bLocal(p.local)}
+          ${statusBadge}
+          <span class="badge b-bl">${anuncios.length} anúncio${anuncios.length!==1?'s':''}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
-          <div style="text-align:right"><div style="font-size:10px;color:#718096">Estoque</div><div style="font-weight:700;${low?'color:#C53030':''}">${estT.toLocaleString('pt-BR')} un</div></div>
-          <div style="text-align:right"><div style="font-size:10px;color:#718096">Lucro médio</div><div style="font-weight:700;color:#276749">${R(lm)}/un</div></div>
-          <div style="display:flex;gap:4px">
-            <button class="btn btn-e btn-xs" onclick="event.stopPropagation();editRaiz('${r.id}')">✎</button>
-            <button class="btn btn-d btn-xs" onclick="event.stopPropagation();delRaiz('${r.id}')">✕</button>
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
+          <div style="text-align:right">
+            <div style="font-size:9px;color:#A0AEC0;font-weight:700;text-transform:uppercase">Estoque</div>
+            <div style="font-weight:800;font-size:15px;color:${zero?'#C53030':low?'#C05621':'#1A202C'}">${(p.qtd||0).toLocaleString('pt-BR')} un</div>
           </div>
-          <span id="rza_${r.id}" style="color:#A0AEC0">▼</span>
+          <div style="text-align:right">
+            <div style="font-size:9px;color:#A0AEC0;font-weight:700;text-transform:uppercase">Custo</div>
+            <div style="font-weight:700;font-size:13px">${R(p.valorUn)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:9px;color:#A0AEC0;font-weight:700;text-transform:uppercase">Lucro/un</div>
+            <div style="font-weight:700;font-size:13px" class="pos">${R(p.lucro)}</div>
+          </div>
+          ${diasEst!==null?`<div style="text-align:right">
+            <div style="font-size:9px;color:#A0AEC0;font-weight:700;text-transform:uppercase">Duração</div>
+            <div style="font-weight:700;font-size:13px;color:${diasEst<7?'#C53030':diasEst<30?'#C05621':'#276749'}">${diasEst}d</div>
+          </div>`:''}
+          <div style="display:flex;gap:4px" onclick="event.stopPropagation()">
+            <button class="btn btn-e btn-xs" onclick="editProd('${p.id}')">✎</button>
+            <button class="btn btn-d btn-xs" onclick="delProd('${p.id}')">✕</button>
+          </div>
+          <span id="rza_p_${p.id}" style="color:#A0AEC0;font-size:12px">▼</span>
         </div>
       </div>
-      <div class="raiz-body" id="rzb_${r.id}">
-        ${r.termos&&r.termos.length?`<div style="padding:7px 14px 7px 28px;background:#F7FAFC;border-bottom:1px solid #E2E8F0;font-size:11px;color:#718096">Palavras-chave: ${r.termos.map(t=>`<span class="term-tag" style="cursor:default">${t}</span>`).join('')}</div>`:''}
-        ${filhos.length?filhos.map(p=>{
-          const pa=anuncs.filter(a=>a.produto===p.nome);
-          return`<div class="filho-row">
-            <div style="flex:1">
-              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
-                <span style="font-weight:700;font-size:13px">${p.nome}</span>
-                ${p.sku?`<span class="badge b-gy" style="font-size:10px">SKU ${p.sku}</span>`:''}
-                ${bLocal(p.local)}
-                <span class="badge b-or">${pa.length} anúncio${pa.length!==1?'s':''}</span>
-              </div>
-              <div style="margin-top:3px;font-size:11px;color:#718096;display:flex;gap:14px;flex-wrap:wrap">
-                <span>Estoque: <strong class="${(p.qtd||0)<=10?'neg':''}">${(p.qtd||0).toLocaleString('pt-BR')} un</strong></span>
-                <span>Custo: <strong>${R(p.valorUn)}</strong></span>
-                <span>Lucro un: <strong class="pos">${R(p.lucro)}</strong></span>
-              </div>
-              <div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
-                ${pa.length?pa.map(a=>{const r2=calcEngine(a.custo,a.preco,a.taxa,a.tfix,a.frete,a.aliq);const pr=a.precoOrig>0&&a.preco<a.precoOrig?`<span style="background:#FFF5EB;color:#C05621;padding:1px 4px;border-radius:3px;font-size:10px;font-weight:700">-${((a.precoOrig-a.preco)/a.precoOrig*100).toFixed(0)}%</span>`:'';return`<div class="anunc-chip">${bCanal(a.canal)}<span style="color:#718096;font-size:11px">${a.loja||''}</span><span style="font-weight:700">${R(a.preco)}</span>${pr}<span class="${r2.lucro>=0?'pos':'neg'}">${R(r2.lucro)}/un</span>${faixa(r2.margem)}<button class="btn btn-e btn-xs" onclick="editAnunc('${a.id}')">✎</button><button class="btn btn-d btn-xs" onclick="delAnunc('${a.id}')">✕</button></div>`;}).join(''):`<span style="font-size:11px;color:#A0AEC0">Sem anúncios — <a href="#" onclick="abrirNovoAnuncio();return false" style="color:#4A6CF7;font-weight:600">+ Adicionar</a></span>`}
-              </div>
-            </div>
-            <div style="display:flex;gap:4px;flex-shrink:0">
-              <button class="btn btn-e btn-xs" onclick="editProd('${p.id}')">✎</button>
-              <button class="btn btn-d btn-xs" onclick="delProd('${p.id}')">✕</button>
-            </div>
-          </div>`;
-        }).join(''):`<div style="padding:14px 28px;font-size:12px;color:#A0AEC0">Sem variações. <button class="btn btn-g btn-xs" onclick="openM('m-prod')">+ Adicionar produto</button></div>`}
-        <div style="padding:8px 14px;border-top:1px solid #E2E8F0;display:flex;gap:8px">
-          <button class="btn btn-g btn-xs" onclick="openM('m-prod')">+ Nova Variação</button>
-          <button class="btn btn-p btn-xs" onclick="abrirNovoAnuncio()">+ Novo Anúncio</button>
+
+      <!-- CORPO: ANÚNCIOS (expansível) -->
+      <div class="raiz-body" id="rzb_p_${p.id}">
+        ${anuncios.length?`
+        <div style="padding:8px 14px;background:#FAFBFF;border-bottom:1px solid #E2E8F0">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="font-size:10px;color:#718096;text-transform:uppercase;letter-spacing:0.4px">
+                <th style="padding:5px 8px;font-weight:700;text-align:left">Canal / Loja</th>
+                <th style="padding:5px 8px;font-weight:700;text-align:left">ID Anúncio</th>
+                <th style="padding:5px 8px;font-weight:700;text-align:left">Classe</th>
+                <th style="padding:5px 8px;font-weight:700;text-align:right">Preço</th>
+                <th style="padding:5px 8px;font-weight:700;text-align:right">Lucro/un</th>
+                <th style="padding:5px 8px;font-weight:700;text-align:right">Margem</th>
+                <th style="padding:5px 8px;font-weight:700;text-align:right">VPD</th>
+                <th style="padding:5px 8px;font-weight:700"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${anuncios.map(a=>{
+                const rc=calcEngine(a.custo,a.preco,a.taxa,a.tfix,a.frete,a.aliq);
+                const promo=a.precoOrig>0&&a.preco<a.precoOrig;
+                return`<tr style="border-top:1px solid #F0F4F8" onmouseover="this.style.background='#F7FAFF'" onmouseout="this.style.background=''">
+                  <td style="padding:8px 8px">
+                    <div style="display:flex;align-items:center;gap:5px">
+                      ${bCanal(a.canal)}
+                      <span style="font-size:11px;color:#718096">${a.loja||''}</span>
+                      ${a.premio?`<span class="badge b-pi" style="font-size:10px">${a.premio}</span>`:''}
+                      ${a.isKit?`<span class="badge b-bl" style="font-size:10px">Kit ${a.kitQtd||2}x</span>`:''}
+                    </div>
+                  </td>
+                  <td style="padding:8px 8px;font-size:11px;color:#718096;font-family:monospace">${a.idAnuncio||'—'}</td>
+                  <td style="padding:8px 8px">${a.classe?`<span class="badge b-pu" style="font-size:10px">${a.classe}</span>`:'—'}</td>
+                  <td style="padding:8px 8px;text-align:right;font-weight:700">
+                    ${promo?`<div style="font-size:10px;color:#A0AEC0;text-decoration:line-through">${R(a.precoOrig)}</div>`:''}
+                    <span style="${promo?'color:#C05621':''}'">${R(a.preco)}</span>
+                    ${promo?`<span class="badge b-or" style="font-size:9px;margin-left:2px">${((a.precoOrig-a.preco)/a.precoOrig*100).toFixed(0)}% off</span>`:''}
+                  </td>
+                  <td style="padding:8px 8px;text-align:right" class="${rc.lucro>=0?'pos':'neg'}">${R(rc.lucro)}</td>
+                  <td style="padding:8px 8px;text-align:right;font-size:12px">${faixa(rc.margem)}</td>
+                  <td style="padding:8px 8px;text-align:right;font-size:12px;font-weight:600">${a.vpd||'—'}/d</td>
+                  <td style="padding:8px 8px">
+                    <div style="display:flex;gap:3px">
+                      <button class="btn btn-e btn-xs" onclick="editAnunc('${a.id}')">✎</button>
+                      <button class="btn btn-d btn-xs" onclick="delAnunc('${a.id}')">✕</button>
+                    </div>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>`
+        :`<div style="padding:12px 20px;font-size:12px;color:#A0AEC0">
+          Nenhum anúncio cadastrado para este produto.
+        </div>`}
+        <div style="padding:8px 14px;border-top:1px solid #E2E8F0;display:flex;gap:8px;background:#F7FAFC">
+          <button class="btn btn-p btn-xs" onclick="abrirNovoAnuncioProd('${p.id}','${p.nome.replace(/'/g,"\'")}')">+ Novo Anúncio</button>
+          <button class="btn btn-g btn-xs" onclick="editProd('${p.id}')">✎ Editar Produto</button>
         </div>
       </div>
     </div>`;
-  }).join('')+(()=>{const sr=prods.filter(p=>!p.raiz);if(!sr.length)return'';return`<div class="card" style="margin-top:8px;border:1px dashed #CBD5E0"><div class="sh"><div class="sh-t" style="color:#A0AEC0">Sem raiz (${sr.length})</div><div class="sh-s">Vincule uma raiz para organizar</div></div>${sr.map(p=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F0F4F8"><span style="font-weight:600">${p.nome}</span><div style="display:flex;gap:6px"><button class="btn btn-o btn-xs" onclick="editProd('${p.id}')">Vincular Raiz</button><button class="btn btn-d btn-xs" onclick="delProd('${p.id}')">✕</button></div></div>`).join('')}</div>`;})();
+  };
+
+  // Renderizar: primeiro agrupados por raiz, depois sem raiz
+  let html='';
+  RA.forEach(r=>{
+    const filhos=porRaiz[r.id]||[];
+    if(!filhos.length)return;
+    const estTotal=filhos.reduce((s,p)=>s+(p.qtd||0),0);
+    const anTotal=AA.filter(a=>filhos.some(f=>f.nome===a.produto)).length;
+    html+=`<div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 10px;background:#EEF3FF;border-radius:8px;border-left:3px solid #4A6CF7">
+        <span style="font-size:13px;font-weight:800;color:#2B4A9F">📁 ${r.nome}</span>
+        ${r.categoria?`<span class="badge b-gy">${r.categoria}</span>`:''}
+        <span class="badge b-bl">${filhos.length} produto${filhos.length!==1?'s':''}</span>
+        <span class="badge b-or">${anTotal} anúncio${anTotal!==1?'s':''}</span>
+        <span style="font-size:11px;color:#718096;margin-left:auto">${estTotal.toLocaleString('pt-BR')} un total</span>
+        <button class="btn btn-e btn-xs" onclick="editRaiz('${r.id}')">✎</button>
+        <button class="btn btn-d btn-xs" onclick="delRaiz('${r.id}')">✕</button>
+      </div>
+      ${filhos.map(p=>renderProdCard(p)).join('')}
+    </div>`;
+  });
+
+  // Produtos sem raiz
+  const semRaiz=porRaiz['__sem_raiz__']||[];
+  if(semRaiz.length){
+    html+=`<div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 10px;background:#F7FAFC;border-radius:8px;border-left:3px solid #CBD5E0">
+        <span style="font-size:13px;font-weight:700;color:#718096">📦 Sem família</span>
+        <span class="badge b-gy">${semRaiz.length} produto${semRaiz.length!==1?'s':''}</span>
+      </div>
+      ${semRaiz.map(p=>renderProdCard(p)).join('')}
+    </div>`;
+  }
+
+  el.innerHTML=html||'<div class="empty"><div class="empty-i">📦</div><p>Nenhum produto cadastrado.</p></div>';
 }
+
+function toggleProdCard(id){
+  const b=document.getElementById('rzb_p_'+id);
+  const a=document.getElementById('rza_p_'+id);
+  const h=document.getElementById('rzh_p_'+id);
+  if(!b)return;
+  const open=b.classList.toggle('open');
+  if(h)h.classList.toggle('open',open);
+  if(a)a.textContent=open?'▲':'▼';
+}
+
+function abrirNovoAnuncioProd(prodId, prodNome){
+  abrirNovoAnuncio();
+  setTimeout(()=>{
+    const sel=document.getElementById('ma-prod-select');
+    if(sel){sel.value=prodId||'';maProdSelectChange();}
+    document.getElementById('ma-prod').value=prodNome;
+    document.getElementById('ma-prod-sel').innerHTML=`<span style="color:#276749;font-weight:700">✓ ${prodNome}</span>`;
+  },50);
+}
+
 function toggleRaiz(id){
   const b=document.getElementById('rzb_'+id),h=document.getElementById('rzh_'+id),a=document.getElementById('rza_'+id);
   const o=b.classList.toggle('open');if(h)h.classList.toggle('open',o);if(a)a.textContent=o?'▲':'▼';
@@ -2163,6 +2289,49 @@ function calcVenda(){
   if(p&&q){res.style.display='block';document.getElementById('mvr-luc').innerHTML=`<span class="${lun*q>=0?'pos':'neg'}">${R(lun*q)}</span>`;document.getElementById('mvr-fat').textContent=R(p*q);}
   else res.style.display='none';
 }
+function conciliarVenda(vendaId){
+  const v=window._V[vendaId];
+  if(!v)return;
+  const PA=Object.values(window._P);
+  const opts=PA.map(p=>`<option value="${p.id}">${p.nome}${p.sku?' (SKU: '+p.sku+')':''}</option>`).join('');
+  const prodSel=prompt(
+    `Conciliar:\n"${v.tituloOriginal||v.produto}"\n\nDigite parte do nome ou SKU do produto no estoque:`
+  );
+  if(!prodSel)return;
+  const q=prodSel.toLowerCase();
+  const found=PA.filter(p=>p.nome.toLowerCase().includes(q)||(p.sku&&p.sku.toLowerCase().includes(q)));
+  if(!found.length){alert('Nenhum produto encontrado com "'+prodSel+'". Tente outro termo.');return;}
+  let escolha=found[0];
+  if(found.length>1){
+    const lista=found.map((p,i)=>`${i+1}. ${p.nome}${p.sku?' ('+p.sku+')':''}`).join('\n');
+    const num=parseInt(prompt(`Vários encontrados:\n${lista}\n\nDigite o número:`));
+    if(!num||num<1||num>found.length)return;
+    escolha=found[num-1];
+  }
+  // Atualizar venda
+  v.produto=escolha.nome;
+  v.pendente=false;
+  const a=Object.values(window._A).find(x=>x.produto===escolha.nome&&x.canal===v.canal)||Object.values(window._A).find(x=>x.produto===escolha.nome);
+  v.lucroUn=a?a.lucro:0;
+  v.lucroTotal=v.lucroUn*v.qtd;
+  if(window._sv)window._sv('vendas',vendaId,v);
+  // Descontar estoque
+  const kq=a&&a.isKit?(a.kitQtd||1):1;
+  escolha.qtd=Math.max(0,(escolha.qtd||0)-v.qtd*kq);
+  escolha.total=escolha.qtd*escolha.valorUn;
+  escolha.totalLucro=escolha.qtd*escolha.lucro;
+  escolha.junto=escolha.total+escolha.totalLucro;
+  if(window._sv)window._sv('produtos',escolha.id,escolha);
+  // Salvar palavras-chave para auto-mapear no futuro
+  const raiz=Object.values(window._R).find(r=>r.id===escolha.raiz);
+  if(raiz&&v.tituloOriginal){
+    const novos=tokenize(v.tituloOriginal).filter(t=>t.length>2&&!(raiz.termos||[]).includes(t)).slice(0,4);
+    if(novos.length){raiz.termos=[...(raiz.termos||[]),...novos];if(window._sv)window._sv('raiz',raiz.id,raiz);}
+  }
+  renderAll();
+  alert(`✓ Conciliado! "${escolha.nome}" vinculado e estoque atualizado.\nPróxima importação vai reconhecer automaticamente.`);
+}
+
 function sVenda(){
   const prod=document.getElementById('mv-prod').value;if(!prod){alert('Selecione produto');return;}
   const q=+document.getElementById('mv-qtd').value||1,p=+document.getElementById('mv-preco').value||0;
@@ -2199,7 +2368,22 @@ function renderVendas(){
     }).join('');
   }
   const tbr=document.getElementById('tb-vend-rec');
-  if(tbr){const rec=[...VA].sort((a,b)=>b.createdAt-a.createdAt).slice(0,10);tbr.innerHTML=rec.map(v=>`<tr><td style="font-weight:600;font-size:12px">${v.produto}</td><td>${bCanal(v.canal)}</td><td class="tr">${v.qtd}</td><td class="tr">${R(v.preco)}</td><td class="tr ${(v.lucroTotal||0)>=0?'pos':'neg'}">${R(v.lucroTotal)}</td><td class="muted" style="font-size:11px">${v.data||'—'}${v.importado?' <span class="badge b-gy">CSV</span>':''}</td></tr>`).join('');}
+  if(tbr){const rec=[...VA].sort((a,b)=>b.createdAt-a.createdAt).slice(0,15);tbr.innerHTML=rec.map(v=>{
+  const isPend=v.pendente;
+  return`<tr style="${isPend?'background:#FFFBEB;':''}">
+    <td style="font-weight:600;font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+      ${isPend?`<span title="${v.tituloOriginal||v.produto}" style="color:#C05621">${v.produto}</span>`:v.produto}
+    </td>
+    <td>${bCanal(v.canal)}</td>
+    <td class="tr">${v.qtd}</td>
+    <td class="tr">${R(v.preco)}</td>
+    <td class="tr ${(v.lucroTotal||0)>=0?'pos':'neg'}">${isPend?'<span class="badge b-yw">Pendente</span>':R(v.lucroTotal)}</td>
+    <td style="font-size:11px">
+      ${v.data||'—'}
+      ${v.importado&&!isPend?'<span class="badge b-gy" style="margin-left:3px">CSV</span>':''}
+      ${isPend?`<button class="btn btn-xs btn-o" style="margin-left:4px" onclick="conciliarVenda('${v.id}')">Conciliar</button>`:''}
+    </td>
+  </tr>`;}).join('');}
   // update mv-prod select
   const mvp=document.getElementById('mv-prod');
   if(mvp){const cur=mvp.value;mvp.innerHTML='<option value="">Selecione...</option>'+PA.map(p=>`<option value="${p.nome}">${p.nome}</option>`).join('');mvp.value=cur;}
@@ -2207,7 +2391,7 @@ function renderVendas(){
 
 // CSV Import
 const CSV_INST={
-  ml:'<strong>Mercado Livre:</strong> Resumo → Vendas → Gerar Excel. Colunas: Título do Anúncio, Qtd. Vendida, Preço Unitário, Data.',
+  ml:'<strong>Mercado Livre:</strong> Minha conta → Vendas → Resumo das vendas → Gerar Excel → baixe o <strong>.xlsx</strong>. O sistema lê automaticamente a aba "Vendas BR" (cabeçalho na linha 6).',
   shopee:'<strong>Shopee:</strong> Central do Vendedor → Meus Relatórios → Pedidos → Exportar CSV. Colunas: Nome do Produto, Quantidade, Preço Acordado.',
   tiktok:'<strong>TikTok Shop:</strong> Seller Center → Pedidos → Exportar. Colunas: Product Name, Quantity, Order Amount.'
 };
@@ -2219,8 +2403,165 @@ function csvTab(t,el){
   const cb=document.getElementById('csv-btn');if(cb)cb.style.display='none';_csvParsed=[];
 }
 document.addEventListener('DOMContentLoaded',()=>{const ci=document.getElementById('csv-inst');if(ci)ci.innerHTML=CSV_INST['ml'];});
-function csvDrop(e){e.preventDefault();document.getElementById('csv-drop').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)parseCSV(f);}
-function csvFileSelected(e){const f=e.target.files[0];if(f)parseCSV(f);}
+function csvDrop(e){e.preventDefault();document.getElementById('csv-drop').classList.remove('drag');
+  const f=e.dataTransfer.files[0];if(!f)return;
+  const ext=f.name.split('.').pop().toLowerCase();
+  if(ext==='xlsx'||ext==='xls'){parseXLSX(f);}else{parseCSV(f);}
+}
+function csvFileSelected(e){const f=e.target.files[0];if(!f)return;
+  const ext=f.name.split('.').pop().toLowerCase();
+  if(ext==='xlsx'||ext==='xls'){parseXLSX(f);}else{parseCSV(f);}
+}
+// ---- XLSX IMPORT (Mercado Livre) ----
+function parseXLSX(file){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      // Usar SheetJS (XLSX) via CDN — já disponível como window.XLSX se carregado
+      // Fallback: ler como ArrayBuffer e processar manualmente linha 6
+      const data=new Uint8Array(ev.target.result);
+      if(typeof XLSX==='undefined'){
+        showCsvErr('Biblioteca XLSX não carregada. Tente recarregar a página.');return;
+      }
+      const wb=XLSX.read(data,{type:'array'});
+      // Tentar aba 'Vendas BR' ou primeira aba
+      const sheetName=wb.SheetNames.find(s=>s.includes('Vendas')||s.includes('vendas'))||wb.SheetNames[0];
+      const ws=wb.Sheets[sheetName];
+      const allRows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      
+      // Mercado Livre: cabeçalho na linha 6 (índice 5), dados a partir da 7 (índice 6)
+      // Detectar linha de cabeçalho buscando 'N.º de venda' ou 'Título do anúncio'
+      let hdrIdx=5; // padrão ML
+      for(let i=0;i<Math.min(10,allRows.length);i++){
+        const row=allRows[i];
+        if(row.some(c=>String(c||'').toLowerCase().includes('título do anúncio')||String(c||'').toLowerCase().includes('n.º de venda'))){
+          hdrIdx=i; break;
+        }
+      }
+      
+      const headers=allRows[hdrIdx].map(h=>String(h||'').trim().toLowerCase());
+      const dataRows=allRows.slice(hdrIdx+1).filter(r=>r.some(c=>c!==''));
+      
+      // Mapear colunas
+      const iTitle=headers.findIndex(h=>h.includes('título do anúncio')||h.includes('titulo do anuncio'));
+      const iQtd=headers.findIndex(h=>h==='unidades'||h.includes('unidades'));
+      const iPreco=headers.findIndex(h=>h.includes('receita por produto'));
+      const iTotal=headers.findIndex(h=>h==='total (brl)'||h==='total');
+      const iData=headers.findIndex(h=>h.includes('data da venda'));
+      const iSKU=headers.findIndex(h=>h==='sku');
+      const iNum=headers.findIndex(h=>h.includes('n.º de venda')||h.includes('n.o de venda'));
+      
+      if(iTitle<0){showCsvErr('Coluna "Título do anúncio" não encontrada. Verifique se é o relatório correto do Mercado Livre.');return;}
+      
+      _csvParsed=[];const unmapped=[];
+      dataRows.forEach(row=>{
+        const titulo=String(row[iTitle]||'').trim();
+        if(!titulo||titulo==='')return;
+        const qtd=parseFloat(row[iQtd])||1;
+        const preco=parseFloat(row[iPreco])||0;
+        const total=parseFloat(row[iTotal])||0;
+        // Parsear data: "14 de abril de 2026 20:24 hs."
+        let data=new Date().toISOString().slice(0,10);
+        if(iData>=0&&row[iData]){
+          const ds=String(row[iData]);
+          const meses={janeiro:'01',fevereiro:'02',março:'03',abril:'04',maio:'05',junho:'06',julho:'07',agosto:'08',setembro:'09',outubro:'10',novembro:'11',dezembro:'12'};
+          const m=ds.match(/(\d+)\s+de\s+(\w+)\s+de\s+(\d{4})/i);
+          if(m){const mes=meses[m[2].toLowerCase()]||'01';data=`${m[3]}-${mes}-${m[1].padStart(2,'0')}`;}
+        }
+        const canal='MERCADO LIVRE';
+        const best=Object.values(window._P).map(p=>({p,s:scoreMatch(titulo,p)})).sort((a,b)=>b.s.score-a.s.score)[0];
+        const matched=best&&best.s.score>=30?best.p:null;
+        if(!matched)unmapped.push(titulo);
+        _csvParsed.push({titulo,qtd,preco:preco/Math.max(qtd,1),data,canal,matched,score:best?best.s.score:0,totalLiq:total});
+      });
+      
+      _renderCsvPreview(unmapped);
+    }catch(e){
+      console.error(e);
+      showCsvErr('Erro ao ler XLSX: '+e.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function _renderCsvPreview(unmapped){
+  const PA=Object.values(window._P);
+  const mapped=_csvParsed.filter(r=>r.matched).length;
+  const total=_csvParsed.length;
+  const cs=document.getElementById('csv-status');
+  if(cs)cs.innerHTML=`<span style="color:#276749;font-weight:700">✓ ${total} linhas · ${mapped} mapeados</span>`+
+    (unmapped.length?` · <span style="color:#C05621;font-weight:700">${unmapped.length} para conciliar</span>`:'');
+
+  // Opções de produtos para o select de vinculação
+  const prodOpts='<option value="">— vincular produto —</option>'+
+    PA.map(p=>`<option value="${p.id}">${p.nome}${p.sku?' (SKU: '+p.sku+')':''}</option>`).join('');
+
+  const cr=document.getElementById('csv-rows');
+  if(cr)cr.innerHTML=_csvParsed.map((r,idx)=>{
+    const isOk=!!r.matched;
+    const corBg=isOk?'#C6F6D5':'#FED7D7';
+    const corTx=isOk?'#276749':'#C53030';
+    const icone=isOk?'✓':'?';
+    return`<div class="imp-row" id="improw_${idx}" style="flex-direction:column;align-items:stretch;padding:8px 4px;gap:5px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:18px;height:18px;border-radius:50%;flex-shrink:0;background:${corBg};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:${corTx}">${icone}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:10px;color:#718096;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.titulo}">${r.titulo}</div>
+          <div style="font-weight:700;font-size:12px;color:${isOk?'#276749':'#C53030'}">${isOk?r.matched.nome:'Não mapeado'}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;font-size:11px">
+          <div style="font-weight:700">${r.qtd}× ${R(r.preco)}</div>
+          <div style="color:#A0AEC0">${r.score}% match</div>
+        </div>
+      </div>
+      ${!isOk?`<div style="display:flex;gap:6px;align-items:center;padding-left:26px">
+        <select onchange="vincularManual(${idx},this.value)" style="flex:1;padding:5px 8px;border:1.5px solid #FBD38D;border-radius:6px;font-size:12px;color:#2D3748;background:#FFFAF0;outline:none">
+          ${prodOpts}
+        </select>
+        <span style="font-size:10px;color:#A0AEC0;white-space:nowrap">ou ficará pendente</span>
+      </div>`:''}
+    </div>`;
+  }).join('');
+
+  const cw=document.getElementById('csv-warn');
+  if(cw)cw.textContent='';
+  const cp=document.getElementById('csv-preview');if(cp)cp.style.display='block';
+  // Botão sempre visível — inclui pendentes sem produto
+  const cb=document.getElementById('csv-btn');
+  if(cb){cb.style.display='inline-flex';cb.textContent=`Confirmar (${mapped} mapeados${unmapped.length?' + '+unmapped.length+' pendentes':''})`;} 
+}
+
+function vincularManual(idx, prodId){
+  if(!prodId){_csvParsed[idx].matched=null;_csvParsed[idx].score=0;return;}
+  const p=Object.values(window._P).find(x=>x.id===prodId);
+  if(!p)return;
+  _csvParsed[idx].matched=p;
+  _csvParsed[idx].score=100;
+  _csvParsed[idx].manual=true;
+  // Atualizar visual da linha
+  const row=document.getElementById('improw_'+idx);
+  if(row){
+    row.querySelector('div[style*="font-weight:700;font-size:12px"]').textContent=p.nome;
+    row.querySelector('div[style*="font-weight:700;font-size:12px"]').style.color='#276749';
+    row.querySelector('div[style*="border-radius:50%"]').textContent='✓';
+    row.querySelector('div[style*="border-radius:50%"]').style.background='#C6F6D5';
+    row.querySelector('div[style*="border-radius:50%"]').style.color='#276749';
+    const sel=row.querySelector('select');if(sel)sel.parentElement.remove();
+    // Salvar vinculação no produto raiz (palavras-chave) para próxima vez
+    const tks=tokenize(_csvParsed[idx].titulo);
+    const raiz=Object.values(window._R).find(r=>r.id===p.raiz);
+    if(raiz&&tks.length){
+      const novos=tks.filter(t=>t.length>2&&!raiz.termos.includes(t)).slice(0,3);
+      if(novos.length){raiz.termos=[...(raiz.termos||[]),...novos];if(window._sv)window._sv('raiz',raiz.id,raiz);}
+    }
+  }
+  // Atualizar contador no botão
+  const mapped=_csvParsed.filter(r=>r.matched).length;
+  const pend=_csvParsed.filter(r=>!r.matched).length;
+  const cb=document.getElementById('csv-btn');
+  if(cb)cb.textContent=`Confirmar (${mapped} mapeados${pend?' + '+pend+' pendentes':''})`;
+}
+
 function parseCSV(file){
   const reader=new FileReader();
   reader.onload=ev=>{
@@ -2250,11 +2591,7 @@ function parseCSV(file){
       _csvParsed.push({titulo,qtd,preco,data,canal,matched,score:best?best.s.score:0});
     });
     const mapped=_csvParsed.filter(r=>r.matched).length;
-    const cs=document.getElementById('csv-status');if(cs)cs.innerHTML=`<span style="color:#276749;font-weight:700">✓ ${_csvParsed.length} linhas · ${mapped} mapeados · ${unmapped.length} não encontrados</span>`;
-    const cr=document.getElementById('csv-rows');if(cr)cr.innerHTML=_csvParsed.slice(0,25).map(r=>`<div class="imp-row"><div style="width:16px;height:16px;border-radius:50%;flex-shrink:0;background:${r.matched?'#C6F6D5':'#FED7D7'};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:${r.matched?'#276749':'#C53030'}">${r.matched?'✓':'?'}</div><div style="flex:1;min-width:0"><div style="font-size:10px;color:#718096;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.titulo}</div><div style="font-weight:700;font-size:12px">${r.matched?r.matched.nome:'<span style="color:#C53030">Não mapeado</span>'}</div></div><div style="text-align:right;flex-shrink:0;font-size:11px"><div style="font-weight:600">${r.qtd}× ${R(r.preco)}</div><div style="color:#A0AEC0">${r.score}% match</div></div></div>`).join('');
-    const cw=document.getElementById('csv-warn');if(cw)cw.textContent=unmapped.length?`⚠ ${unmapped.length} produto(s) não mapeado(s). Cadastre palavras-chave nas raízes para melhorar.`:'';
-    const cp2=document.getElementById('csv-preview');if(cp2)cp2.style.display='block';
-    const cb2=document.getElementById('csv-btn');if(cb2)cb2.style.display=mapped>0?'inline-flex':'none';
+    _renderCsvPreview(unmapped);
   };
   reader.readAsText(file,'utf-8');
 }
@@ -2265,19 +2602,34 @@ function showCsvErr(msg){
   const cb=document.getElementById('csv-btn');if(cb)cb.style.display='none';
 }
 function confirmCSV(){
-  let count=0;
+  let count=0, pend=0;
   _csvParsed.forEach(r=>{
-    if(!r.matched)return;
     const id='v_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
-    const a=Object.values(window._A).find(x=>x.produto===r.matched.nome&&x.canal===r.canal)||Object.values(window._A).find(x=>x.produto===r.matched.nome);
-    const lun=a?a.lucro:0;
-    const obj={id,produto:r.matched.nome,canal:r.canal,qtd:r.qtd,preco:r.preco,lucroUn:lun,lucroTotal:lun*r.qtd,faturamento:r.preco*r.qtd,data:r.data,importado:true,createdAt:Date.now()};
-    window._V[id]=obj;if(window._sv)window._sv('vendas',id,obj);
-    const p=r.matched,kq=a&&a.isKit?(a.kitQtd||1):1;
-    p.qtd=Math.max(0,(p.qtd||0)-r.qtd*kq);p.total=p.qtd*p.valorUn;p.totalLucro=p.qtd*p.lucro;p.junto=p.total+p.totalLucro;
-    if(window._sv)window._sv('produtos',p.id,p);count++;
+    if(r.matched){
+      // Produto identificado — importar normalmente
+      const a=Object.values(window._A).find(x=>x.produto===r.matched.nome&&x.canal===r.canal)||Object.values(window._A).find(x=>x.produto===r.matched.nome);
+      const lun=a?a.lucro:0;
+      const obj={id,produto:r.matched.nome,canal:r.canal,qtd:r.qtd,preco:r.preco,lucroUn:lun,lucroTotal:lun*r.qtd,faturamento:r.preco*r.qtd,data:r.data,importado:true,manual:r.manual||false,createdAt:Date.now()};
+      window._V[id]=obj;if(window._sv)window._sv('vendas',id,obj);
+      // Descontar estoque
+      const p=r.matched,kq=a&&a.isKit?(a.kitQtd||1):1;
+      p.qtd=Math.max(0,(p.qtd||0)-r.qtd*kq);p.total=p.qtd*p.valorUn;p.totalLucro=p.qtd*p.lucro;p.junto=p.total+p.totalLucro;
+      if(window._sv)window._sv('produtos',p.id,p);
+      count++;
+    } else {
+      // Produto não identificado — salvar como PENDENTE para conciliação
+      const obj={id,produto:'⚠ '+r.titulo.slice(0,60),tituloOriginal:r.titulo,canal:r.canal,qtd:r.qtd,preco:r.preco,lucroUn:0,lucroTotal:0,faturamento:r.preco*r.qtd,data:r.data,importado:true,pendente:true,createdAt:Date.now()};
+      window._V[id]=obj;if(window._sv)window._sv('vendas',id,obj);
+      pend++;
+    }
   });
-  closeM('m-import-csv');renderAll();alert(`✓ ${count} vendas importadas e estoque atualizado!`);
+  closeM('m-import-csv');renderAll();
+  let msg=`✓ ${count} vendas importadas e estoque atualizado!`;
+  if(pend>0)msg+=`
+
+⚠ ${pend} item(s) salvos como PENDENTES.
+Vá em Registro de Vendas para conciliar.`;
+  alert(msg);
 }
 // csv inst handled in DOMContentLoaded
 
@@ -2541,7 +2893,7 @@ document.addEventListener("DOMContentLoaded", function(){
 <div class="ov" id="m-import-csv">
   <div class="modal" style="max-width:680px">
     <div class="mhd">
-      <div><div class="mttl">⬆ Importar CSV de Vendas</div><div style="font-size:11px;color:#718096;margin-top:2px">ML, Shopee ou TikTok — detecta e mapeia automaticamente pelo nome do produto</div></div>
+      <div><div class="mttl">⬆ Importar Vendas</div><div style="font-size:11px;color:#718096;margin-top:2px">ML (.xlsx), Shopee (.csv) ou TikTok (.csv) — mapeia automaticamente</div></div>
       <button class="btn btn-g btn-xs" onclick="closeM('m-import-csv')">✕</button>
     </div>
     <div class="tabs" id="csv-tabs">
@@ -2553,9 +2905,9 @@ document.addEventListener("DOMContentLoaded", function(){
     <div class="drop-zone" id="csv-drop" onclick="document.getElementById('csv-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="csvDrop(event)">
       <div style="font-size:24px;margin-bottom:6px">📂</div>
       <div style="font-weight:600;font-size:13px;color:#2D3748">Arraste o arquivo CSV aqui ou clique para selecionar</div>
-      <div style="font-size:11px;color:#A0AEC0;margin-top:4px">Formatos: .csv, .txt (separado por vírgula ou ponto-e-vírgula)</div>
+      <div style="font-size:11px;color:#A0AEC0;margin-top:4px">Formatos: .xlsx (Mercado Livre), .csv, .txt (Shopee / TikTok)</div>
     </div>
-    <input type="file" id="csv-file" accept=".csv,.txt" style="display:none" onchange="csvFileSelected(event)">
+    <input type="file" id="csv-file" accept=".csv,.txt,.xlsx,.xls" style="display:none" onchange="csvFileSelected(event)">
     <div id="csv-preview" style="display:none">
       <div id="csv-status" style="margin:10px 0;font-size:13px;font-weight:600"></div>
       <div style="background:#F7FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px;max-height:200px;overflow-y:auto" id="csv-rows"></div>
