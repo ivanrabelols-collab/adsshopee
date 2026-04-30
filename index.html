@@ -334,6 +334,7 @@ input[type=file]{display:none}
       <div class="sh">
         <div><div class="sh-t">Anúncios por Produto</div><div class="sh-s">Clique no produto para ver todos os anúncios cadastrados</div></div>
         <button class="btn btn-p btn-sm" onclick="openM('m-anunc')">+ Novo Anúncio</button>
+        <button class="btn btn-sm" style="background:#ee4d2d;color:#fff;border:none" onclick="openM('m-shopee-import')">🛍️ Importar Shopee</button>
       </div>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:8px">
@@ -608,7 +609,32 @@ input[type=file]{display:none}
       <button class="btn btn-d" onclick="clearAll()">🗑 Limpar Dados Locais</button>
     </div>
   </div>
-  <div class="card">
+        <div class="card" style="margin-bottom:16px">
+        <div class="card-hd" style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">🛍️</span>
+          <div>
+            <div style="font-weight:700;font-size:15px">Shopee — Integração API</div>
+            <div style="font-size:12px;color:#888">Configure as credenciais para importar anúncios automaticamente</div>
+          </div>
+        </div>
+        <div style="padding:14px 0;border-top:1px solid #f1f5f9;margin-top:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><label style="font-size:11px;font-weight:600;color:#888;display:block;margin-bottom:4px">LOJA 1 — Nome</label><input id="cfg-shopee1-nome" class="inp" placeholder="ex: Mineirinho Imports"></div>
+            <div><label style="font-size:11px;font-weight:600;color:#888;display:block;margin-bottom:4px">LOJA 1 — Seller ID</label><input id="cfg-shopee1-sid" class="inp" placeholder="ex: 123456789"></div>
+            <div><label style="font-size:11px;font-weight:600;color:#888;display:block;margin-bottom:4px">LOJA 2 — Nome</label><input id="cfg-shopee2-nome" class="inp" placeholder="ex: DL Shop"></div>
+            <div><label style="font-size:11px;font-weight:600;color:#888;display:block;margin-bottom:4px">LOJA 2 — Seller ID</label><input id="cfg-shopee2-sid" class="inp" placeholder="ex: 987654321"></div>
+          </div>
+          <div style="margin-top:12px;padding:10px;background:#fff8f6;border-radius:6px;font-size:12px;color:#666;border:1px solid #ee4d2d22">
+            <b>💡 Como usar a integração:</b> Configure os nomes das lojas acima. Na página de Anúncios, clique em <b>Importar Shopee</b> e informe o ID do anúncio. O formulário será pré-preenchido automaticamente para você completar os dados de precificação.
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn btn-p btn-sm" onclick="salvarConfigShopee()">Salvar Configuração</button>
+            <button class="btn btn-g btn-sm" onclick="carregarConfigShopee()">Recarregar</button>
+          </div>
+          <div id="cfg-shopee-msg" style="display:none;margin-top:8px;padding:8px;border-radius:4px;font-size:12px"></div>
+        </div>
+      </div>
+<div class="card">
     <div class="sh"><div class="sh-t">Lojas Cadastradas</div></div>
     <div style="display:flex;gap:7px;flex-wrap:wrap">
       <span class="badge b-rd">TikTok DL</span><span class="badge b-yw">Raposa ML</span>
@@ -922,6 +948,51 @@ input[type=file]{display:none}
     </div>
   </div>
 </div>
+<div class="ov" id="m-shopee-import">
+  <div class="modal" style="max-width:600px">
+    <div class="mhd">
+      <div class="mttl" style="display:flex;align-items:center;gap:8px"><span style="color:#ee4d2d">🛍️</span> Importar da Shopee</div>
+      <button class="btn btn-g btn-xs" onclick="closeM('m-shopee-import')">✕</button>
+    </div>
+    <div style="padding:16px">
+      <div style="background:#fff8f6;border:1px solid #ee4d2d22;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#555">
+        <b>Como importar:</b><br>
+        1. No <b>Seller Center Shopee</b>, vá em <b>Meus Anúncios</b><br>
+        2. Copie o ID do anúncio (ex: 6249087558)<br>
+        3. Cole abaixo, selecione a loja e clique em Buscar<br>
+        4. Confirme os dados e o formulário será pré-preenchido
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:#333;display:block;margin-bottom:6px">ID do Anúncio Shopee</label>
+        <div style="display:flex;gap:8px">
+          <input id="si-idanunc" class="inp" style="flex:1" placeholder="ex: 6249087558">
+          <select id="si-loja" class="inp" style="width:160px"><option value="">Selecione a Loja</option></select>
+          <button class="btn btn-p btn-sm" onclick="shopeeSearchById()">Buscar</button>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:#333;display:block;margin-bottom:6px">Ou importar lista de IDs (um por linha)</label>
+        <textarea id="si-ids" class="inp" rows="4" style="width:100%;font-family:monospace;font-size:12px" placeholder="6249087558&#10;7412369852&#10;8523014785"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <select id="si-loja-bulk" class="inp" style="width:160px"><option value="">Selecione a Loja</option></select>
+          <button class="btn btn-p btn-sm" onclick="shopeeImportBulk()">Importar Lista</button>
+        </div>
+      </div>
+      <div id="si-result" style="display:none;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;max-height:280px;overflow-y:auto">
+        <table class="tbl" id="si-table"><thead><tr><th style="width:30px"></th><th>ID Anúncio</th><th>Produto</th><th>Loja</th><th>Status</th></tr></thead><tbody id="si-tbody"></tbody></table>
+      </div>
+      <div id="si-preview" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:10px">Preview — confirme antes de cadastrar:</div>
+        <div id="si-preview-content"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn btn-p btn-sm" onclick="shopeeConfirmImport()">✓ Cadastrar Anúncio</button>
+          <button class="btn btn-g btn-sm" onclick="shopeeResetPreview()">Cancelar</button>
+        </div>
+      </div>
+      <div id="si-msg" style="display:none;padding:10px;border-radius:6px;font-size:13px;margin-top:10px"></div>
+    </div>
+  </div>
+</div>
 <div class="ov" id="m-calc-rapida">
   <div class="modal" style="max-width:700px">
     <div class="mhd">
@@ -1196,8 +1267,8 @@ document.getElementById('tdate').textContent=new Date().toLocaleDateString('pt-B
 // NAV
 const PT={dashboard:'Dashboard',raiz:'Produtos Raiz',produtos:'Estoque',anuncios:'Anúncios',vendas:'Registro de Vendas',pdv:'PDV — Ponto de Venda',crm:'CRM — Clientes',precificacao:'Precificação',projecao:'Projeção de Lucro',relatorios:'Relatórios & Análises',catalogo:'Catálogo de Produtos',config:'Configurações'};
 function nav(p,el){
-  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.topnav-menu .ni').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('active'));
   const pg=document.getElementById('page-'+p);
   if(pg)pg.classList.add('active');
   if(el)el.classList.add('active');
@@ -3425,6 +3496,145 @@ function renderAll(){
 // Catalog page exists check - add if missing
 
 
+
+
+// ===== SHOPEE INTEGRATION =====
+
+function shopeeGetLojas() {
+  const cfg = JSON.parse(localStorage.getItem('dl_shopee_config') || '{}');
+  return [
+    { id: 'loja1', nome: cfg.loja1_nome || 'Loja Shopee 1', sid: cfg.loja1_sid || '' },
+    { id: 'loja2', nome: cfg.loja2_nome || 'Loja Shopee 2', sid: cfg.loja2_sid || '' }
+  ].filter(l => l.nome && l.nome !== 'Loja Shopee 1' && l.nome !== 'Loja Shopee 2');
+}
+
+function shopeePopulateLojaSelects() {
+  const lojas = shopeeGetLojas();
+  ['si-loja','si-loja-bulk'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
+    if (lojas.length === 0) {
+      sel.add(new Option('Configure lojas em Config', ''));
+    } else {
+      lojas.forEach(l => sel.add(new Option(l.nome, l.nome)));
+    }
+  });
+}
+
+function shopeeShowMsg(msg, type) {
+  const el = document.getElementById('si-msg');
+  if (!el) return;
+  el.style.display = 'block';
+  const colors = { ok: ['#d1fae5','#065f46','#a7f3d0'], err: ['#fee2e2','#991b1b','#fca5a5'], warn: ['#fef3c7','#92400e','#fde68a'] };
+  const c = colors[type] || colors.warn;
+  el.style.background = c[0]; el.style.color = c[1]; el.style.border = '1px solid ' + c[2];
+  el.textContent = msg;
+  setTimeout(() => { if (el) el.style.display = 'none'; }, 5000);
+}
+
+function shopeeSearchById() {
+  const id = (document.getElementById('si-idanunc') || {}).value && document.getElementById('si-idanunc').value.trim();
+  const loja = document.getElementById('si-loja') && document.getElementById('si-loja').value;
+  if (!id) { shopeeShowMsg('Informe o ID do an\u00FAncio', 'warn'); return; }
+  if (!loja) { shopeeShowMsg('Selecione a loja', 'warn'); return; }
+  shopeeShowPreview({ id: id, loja: loja, canal: 'Shopee' });
+}
+
+function shopeeShowPreview(data) {
+  const prevEl = document.getElementById('si-preview');
+  const prevContent = document.getElementById('si-preview-content');
+  if (!prevEl || !prevContent) return;
+  window._shopeePreviewData = data;
+  prevContent.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">'
+    + '<div><span style="color:#888;font-size:11px">ID AN\u00daCIO</span><div style="font-weight:600">' + data.id + '</div></div>'
+    + '<div><span style="color:#888;font-size:11px">LOJA</span><div style="font-weight:600">' + data.loja + '</div></div>'
+    + '<div><span style="color:#888;font-size:11px">CANAL</span><div style="font-weight:600">' + (data.canal || 'Shopee') + '</div></div>'
+    + '<div><span style="color:#888;font-size:11px">PRODUTO</span><div style="font-weight:600">' + (data.produto || '\u2014') + '</div></div>'
+    + '</div>'
+    + '<div style="margin-top:8px;padding:8px;background:#fff8f6;border-radius:6px;font-size:12px;color:#666">Ao confirmar, o formul\u00E1rio de cadastro ser\u00E1 pr\u00E9-preenchido para voc\u00EA completar.</div>';
+  prevEl.style.display = 'block';
+}
+
+function shopeeConfirmImport() {
+  const data = window._shopeePreviewData;
+  if (!data) return;
+  closeM('m-shopee-import');
+  setTimeout(function() {
+    openM('m-anunc');
+    var setF = function(id, val) { var el = document.getElementById(id); if (el) el.value = val; };
+    setF('ma-id', data.id || '');
+    setF('ma-loja', data.loja || '');
+    setF('ma-canal', data.canal || 'Shopee');
+    if (data.produto) {
+      setF('ma-kw-input', data.produto);
+      var kwEl = document.getElementById('ma-kw-input');
+      if (kwEl) kwEl.dispatchEvent(new Event('input'));
+    }
+  }, 300);
+}
+
+function shopeeResetPreview() {
+  var el = document.getElementById('si-preview');
+  if (el) el.style.display = 'none';
+  window._shopeePreviewData = null;
+}
+
+function shopeeImportBulk() {
+  var idsEl = document.getElementById('si-ids');
+  var lojaEl = document.getElementById('si-loja-bulk');
+  var idsRaw = idsEl && idsEl.value && idsEl.value.trim();
+  var loja = lojaEl && lojaEl.value;
+  if (!idsRaw) { shopeeShowMsg('Cole os IDs dos an\u00FAncios (um por linha)', 'warn'); return; }
+  if (!loja) { shopeeShowMsg('Selecione a loja', 'warn'); return; }
+  var ids = idsRaw.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; });
+  if (!ids.length) { shopeeShowMsg('Nenhum ID v\u00E1lido encontrado', 'warn'); return; }
+  var tbodyEl = document.getElementById('si-tbody');
+  var resultEl = document.getElementById('si-result');
+  if (!tbodyEl || !resultEl) return;
+  tbodyEl.innerHTML = '';
+  resultEl.style.display = 'block';
+  ids.forEach(function(id) {
+    var tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.innerHTML = '<td><input type="checkbox" checked></td><td style="font-family:monospace">' + id + '</td><td style="color:#888">—</td><td>' + loja + '</td><td><span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-size:11px">Pendente</span></td>';
+    var capturedId = id; var capturedLoja = loja;
+    tr.addEventListener('click', function(e) {
+      if (e.target.tagName === 'INPUT') return;
+      shopeeShowPreview({ id: capturedId, loja: capturedLoja, canal: 'Shopee' });
+    });
+    tbodyEl.appendChild(tr);
+  });
+  shopeeShowMsg(ids.length + ' an\u00FAncios listados. Clique em um para cadastrar.', 'ok');
+}
+
+function salvarConfigShopee() {
+  var cfg = {
+    loja1_nome: (document.getElementById('cfg-shopee1-nome') || {}).value || '',
+    loja1_sid:  (document.getElementById('cfg-shopee1-sid') || {}).value || '',
+    loja2_nome: (document.getElementById('cfg-shopee2-nome') || {}).value || '',
+    loja2_sid:  (document.getElementById('cfg-shopee2-sid') || {}).value || '',
+  };
+  localStorage.setItem('dl_shopee_config', JSON.stringify(cfg));
+  var msg = document.getElementById('cfg-shopee-msg');
+  if (msg) {
+    msg.style.display = 'block'; msg.style.background = '#d1fae5';
+    msg.style.color = '#065f46'; msg.style.border = '1px solid #a7f3d0';
+    msg.textContent = '\u2713 Configura\u00E7\u00E3o Shopee salva!';
+    setTimeout(function() { msg.style.display = 'none'; }, 3000);
+  }
+}
+
+function carregarConfigShopee() {
+  var cfg = JSON.parse(localStorage.getItem('dl_shopee_config') || '{}');
+  var setF = function(id, val) { var el = document.getElementById(id); if (el) el.value = val || ''; };
+  setF('cfg-shopee1-nome', cfg.loja1_nome);
+  setF('cfg-shopee1-sid', cfg.loja1_sid);
+  setF('cfg-shopee2-nome', cfg.loja2_nome);
+  setF('cfg-shopee2-sid', cfg.loja2_sid);
+}
+
+// ===== END SHOPEE INTEGRATION =====
 </script>
 </body>
 </html>
