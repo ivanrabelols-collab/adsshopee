@@ -3557,23 +3557,37 @@ function shopeeShowPreview(data) {
 }
 
 function shopeeConfirmImport() {
-  const data = window._shopeePreviewData;
+  var data = window._shopeePreviewData;
   if (!data) return;
   closeM('m-shopee-import');
   setTimeout(function() {
     openM('m-anunc');
-    var setF = function(id, val) { var el = document.getElementById(id); if (el) el.value = val; };
-    setF('ma-id', data.id || '');
-    setF('ma-loja', data.loja || '');
-    setF('ma-canal', data.canal || 'Shopee');
+    var idEl = document.getElementById('ma-id');
+    if (idEl) idEl.value = data.id || '';
+    var lojaEl = document.getElementById('ma-loja');
+    if (lojaEl && data.loja) {
+      var lojaKey = data.loja.toUpperCase().split(' ')[0];
+      for (var i = 0; i < lojaEl.options.length; i++) {
+        var optVal = lojaEl.options[i].value.toUpperCase();
+        if (optVal && (lojaKey.indexOf(optVal) >= 0 || optVal.indexOf(lojaKey) >= 0)) {
+          lojaEl.selectedIndex = i; break;
+        }
+      }
+    }
+    var canalEl = document.getElementById('ma-canal');
+    if (canalEl) {
+      for (var j = 0; j < canalEl.options.length; j++) {
+        if (canalEl.options[j].value === 'SHOPEE' || canalEl.options[j].value === 'Shopee') {
+          canalEl.selectedIndex = j; break;
+        }
+      }
+    }
     if (data.produto) {
-      setF('ma-kw-input', data.produto);
       var kwEl = document.getElementById('ma-kw-input');
-      if (kwEl) kwEl.dispatchEvent(new Event('input'));
+      if (kwEl) { kwEl.value = data.produto; kwEl.dispatchEvent(new Event('input')); }
     }
   }, 300);
 }
-
 function shopeeResetPreview() {
   var el = document.getElementById('si-preview');
   if (el) el.style.display = 'none';
