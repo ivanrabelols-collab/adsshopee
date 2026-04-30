@@ -81,364 +81,310 @@ window._rm=async(col,id)=>{
 </script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;background:#F4F5F7;color:#1A202C}
-button{font-family:inherit;cursor:pointer} input,select,textarea{font-family:inherit}
-
-/* APP SHELL */
-.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
-
-/* TOP NAV BAR */
-.topnav{background:#1E2533;display:flex;flex-direction:column;flex-shrink:0;z-index:100}
-.topnav-brand{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:48px;border-bottom:1px solid rgba(255,255,255,0.07)}
-.sb-logo{display:flex;align-items:center;gap:9px;color:#fff;font-size:14px;font-weight:700}
-.sb-ico{width:28px;height:28px;border-radius:6px;background:#4A6CF7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
-.sb-sub{font-size:10px;color:rgba(255,255,255,0.35);margin-left:4px}
-.topnav-right{display:flex;align-items:center;gap:8px}
-.topnav-menu{display:flex;align-items:center;padding:0 8px;height:38px;overflow-x:auto;gap:2px;scrollbar-width:none}
-.topnav-menu::-webkit-scrollbar{display:none}
-.topnav-sep{width:1px;height:16px;background:rgba(255,255,255,0.12);margin:0 4px;flex-shrink:0}
-.ni{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,0.55);font-size:12px;font-weight:500;transition:all .12s;user-select:none;white-space:nowrap;flex-shrink:0}
-.ni:hover{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.9)}
-.ni.active{background:rgba(74,108,247,0.28);color:#9DB8FB}
-.ni-ic{font-size:12px;flex-shrink:0}
-#fb-st{font-weight:500;font-size:11px}
-
-/* MAIN */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.tb{height:46px;min-height:46px;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 20px;justify-content:space-between;gap:10px}
-.tb-title{font-size:14px;font-weight:700;color:#1A202C;white-space:nowrap}
-.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.av{width:28px;height:28px;border-radius:50%;background:#4A6CF7;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
-.ct{flex:1;overflow-y:auto;padding:20px}
-.pg{display:none} .pg.active{display:block}
-
-/* CARDS */
-.card{background:#fff;border-radius:10px;border:1px solid #E2E8F0;padding:18px}
-
-/* KPI */
-.kpig{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px;margin-bottom:18px}
-.kpi{background:#fff;border-radius:10px;border:1px solid #E2E8F0;padding:16px 18px;position:relative;overflow:hidden}
-.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
-.kpi.kb::before{background:#4A6CF7} .kpi.kg::before{background:#48C78E}
-.kpi.ko::before{background:#F6973F} .kpi.kr::before{background:#FC5C7D}
-.kpi.kp::before{background:#9B59B6}
-.kpi-l{font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
-.kpi-v{font-size:22px;font-weight:700;color:#1A202C;letter-spacing:-0.4px;line-height:1.2}
-.kpi-s{font-size:11px;color:#A0AEC0;margin-top:3px}
-
-/* SECTION HEADER */
-.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
-.sh-t{font-size:14px;font-weight:600;color:#2D3748}
-.sh-s{font-size:11px;color:#A0AEC0}
-
-/* TABLE */
-.tw{overflow-x:auto;border-radius:10px;border:1px solid #E2E8F0;background:#fff}
-.tw.nb{border:none;border-radius:0}
+html,body{height:100%;font-family:'Inter',system-ui,sans-serif;font-size:14px;background:#F5F7FA;color:#1A1D23}
+button{font-family:inherit;cursor:pointer}input,select,textarea{font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#EE4D2D!important;box-shadow:0 0 0 3px rgba(238,77,45,.12)!important}
+.app{display:flex;height:100vh;overflow:hidden}
+.tb{width:224px;flex-shrink:0;background:#fff;border-right:1px solid #EAECF0;display:flex;flex-direction:column;transition:width .2s;z-index:200;overflow:hidden}
+.tb.collapsed{width:56px}
+.tb-brand{height:56px;display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid #EAECF0;flex-shrink:0}
+.tb-logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#EE4D2D,#FF7337);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 2px 8px rgba(238,77,45,.3)}
+.tb-logo-text{font-size:13px;font-weight:700;color:#1A1D23;white-space:nowrap;flex:1;overflow:hidden}
+.tb-logo-sub{display:block;font-size:10px;color:#9DA4AE;font-weight:400}
+.tb-colbtn{margin-left:auto;width:24px;height:24px;border:none;background:none;color:#9DA4AE;font-size:18px;display:flex;align-items:center;justify-content:center;border-radius:6px;flex-shrink:0;line-height:1}
+.tb-colbtn:hover{background:#F5F7FA;color:#1A1D23}
+.tb-nav{flex:1;overflow-y:auto;padding:6px 0}
+.tb-nav::-webkit-scrollbar{width:3px}.tb-nav::-webkit-scrollbar-thumb{background:#E2E6EA;border-radius:3px}
+.tb-sect{padding:4px 14px 2px;font-size:9px;font-weight:700;color:#9DA4AE;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;margin-top:8px;overflow:hidden}
+.ni{display:flex;align-items:center;gap:10px;padding:8px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;transition:all .15s;color:#4A5568;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden}
+.ni:hover{background:#FFF5F3;color:#EE4D2D}.ni.active{background:#FFF5F3;color:#EE4D2D;font-weight:600}
+.ni-ic{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ni-lb{overflow:hidden;white-space:nowrap}
+.tb.collapsed .ni-lb,.tb.collapsed .tb-logo-text,.tb.collapsed .tb-sect{display:none}
+.tb.collapsed .ni{justify-content:center;padding:8px;margin:1px 6px}
+.tb.collapsed .tb-brand{justify-content:center;padding:0 12px}
+.tb.collapsed .tb-colbtn{display:none}
+.tb-footer{padding:10px 14px;border-top:1px solid #EAECF0;flex-shrink:0}
+.fb-status{display:flex;align-items:center;gap:6px;font-size:11px;color:#9DA4AE;overflow:hidden}
+.fb-dot{width:7px;height:7px;border-radius:50%;background:#12B76A;flex-shrink:0}
+.fb-dot.offline{background:#F04438}
+.tb.collapsed .fb-status span{display:none}
+.ct{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:56px;background:#fff;border-bottom:1px solid #EAECF0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;gap:12px}
+.topbar-left{display:flex;align-items:center;gap:8px}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#ptitle{font-size:15px;font-weight:700;color:#1A1D23}
+#tclock{font-size:12px;font-weight:600;color:#4A5568;min-width:65px;text-align:right}
+#tdate{font-size:11px;color:#9DA4AE}
+.page{display:none;flex:1;overflow-y:auto;padding:24px;flex-direction:column;gap:20px}
+.page.active{display:flex}
+.page::-webkit-scrollbar{width:5px}.page::-webkit-scrollbar-thumb{background:#E2E6EA;border-radius:5px}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:0}
+.sh-t{font-size:15px;font-weight:700;color:#1A1D23}.sh-s{font-size:12px;color:#9DA4AE;margin-top:2px}
+.kpig{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px}
+.kpi{background:#fff;border:1px solid #EAECF0;border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kc,#EE4D2D);border-radius:12px 12px 0 0}
+.kpi.kb::before{background:#EE4D2D}.kpi.kg::before{background:#12B76A}.kpi.kp::before{background:#6366F1}.kpi.ky::before{background:#F59E0B}.kpi.kt::before{background:#10B981}
+.kpi-l{font-size:10px;font-weight:600;color:#9DA4AE;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.kpi-v{font-size:22px;font-weight:700;color:#1A1D23;letter-spacing:-.5px;line-height:1.2}
+.kpi-s{font-size:11px;color:#9DA4AE;margin-top:4px}
+.card{background:#fff;border:1px solid #EAECF0;border-radius:12px;padding:18px 20px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:14px;font-weight:600;color:#1A1D23}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;border:none;transition:all .15s;cursor:pointer;white-space:nowrap;line-height:1.4}
+.btn-p{background:#EE4D2D;color:#fff}.btn-p:hover{background:#D94429}
+.btn-g{background:#F5F7FA;color:#4A5568;border:1px solid #EAECF0}.btn-g:hover{background:#EAECF0;border-color:#CBD2D9}
+.btn-danger{background:#FEF3F2;color:#B42318;border:1px solid #FECDCA}.btn-danger:hover{background:#FEE4E2}
+.btn-sm{padding:6px 14px;font-size:12px}.btn-xs{padding:3px 8px;font-size:11px;border-radius:6px}
+.btn-ic{padding:5px;border-radius:6px;background:#F5F7FA;border:1px solid #EAECF0;color:#4A5568;font-size:13px;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center}
+.btn-ic:hover{background:#EAECF0}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fg label,.flabel{font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg select,.fg textarea,input[class*="inp"],select[class*="sel"]{border:1px solid #EAECF0;border-radius:8px;padding:8px 11px;font-size:13px;color:#1A1D23;background:#fff;width:100%;transition:border-color .15s}
+.fg input:hover,.fg select:hover{border-color:#CBD2D9}
+.fg textarea{resize:vertical;min-height:70px}
+.frow{display:grid;gap:10px;margin-bottom:10px}
+.frow.c2{grid-template-columns:1fr 1fr}.frow.c3{grid-template-columns:1fr 1fr 1fr}.frow.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.tw{overflow-x:auto;border-radius:12px;border:1px solid #EAECF0;background:#fff}
+.tw.nb{border:none;border-radius:0;background:transparent}
 table{width:100%;border-collapse:collapse}
-thead{background:#F7FAFC}
-th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;border-bottom:1px solid #E2E8F0}
-td{padding:9px 12px;font-size:13px;color:#2D3748;border-bottom:1px solid #F0F4F8;white-space:nowrap}
-tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
+thead{background:#F9FAFB}
+th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;border-bottom:1px solid #EAECF0}
+td{padding:11px 14px;font-size:13px;color:#374151;border-bottom:1px solid #F3F4F6;white-space:nowrap}
+tr:last-child td{border-bottom:none}tbody tr:hover td{background:#FAFBFF}
 .tr{text-align:right;font-variant-numeric:tabular-nums}
-
-/* BADGES */
-.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
-.b-bl{background:#EBF4FF;color:#2B6CB0} .b-yw{background:#FFFFF0;color:#975A16}
-.b-or{background:#FFF5EB;color:#C05621} .b-gr{background:#F0FFF4;color:#276749}
-.b-rd{background:#FFF5F5;color:#C53030} .b-pu{background:#FAF5FF;color:#6B46C1}
-.b-gy{background:#F7FAFC;color:#4A5568} .b-pi{background:#FFF0F6;color:#97266D}
-
-/* FORMS */
-.fg{display:flex;flex-direction:column;gap:4px}
-.fg label{font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.4px}
-.fg input,.fg select,.fg textarea{padding:7px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;color:#2D3748;background:#fff;transition:border-color .14s;outline:none}
-.fg input:focus,.fg select:focus{border-color:#4A6CF7;box-shadow:0 0 0 3px rgba(74,108,247,0.1)}
-.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:11px}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:600;border:none;transition:all .12s;cursor:pointer;white-space:nowrap;line-height:1}
-.btn-xs{padding:4px 9px;font-size:11px;border-radius:5px}
-.btn-sm{padding:5px 11px;font-size:12px}
-.btn-p{background:#4A6CF7;color:#fff} .btn-p:hover{background:#3A5CE7;box-shadow:0 3px 10px rgba(74,108,247,0.3);transform:translateY(-1px)}
-.btn-g{background:#F7FAFC;color:#4A5568;border:1px solid #E2E8F0} .btn-g:hover{background:#EDF2F7}
-.btn-d{background:#FFF5F5;color:#C53030;border:1px solid #FED7D7} .btn-d:hover{background:#FED7D7}
-.btn-e{background:#F0FFF4;color:#276749;border:1px solid #C6F6D5} .btn-e:hover{background:#C6F6D5}
-.btn-o{background:#FFF5EB;color:#C05621;border:1px solid #FDDCB5} .btn-o:hover{background:#FDDCB5}
-
-/* COLORS */
-.pos{color:#276749;font-weight:600} .neg{color:#C53030;font-weight:600}
-.muted{color:#A0AEC0} .fw6{font-weight:600} .fw7{font-weight:700}
-
-/* DIVIDER */
-.dvd{height:1px;background:#E2E8F0;margin:14px 0}
-
-/* MODAL */
-.ov{position:fixed;inset:0;z-index:300;background:rgba(15,20,35,0.5);display:none;align-items:center;justify-content:center;padding:16px}
+.tabs{display:flex;gap:2px;background:#F5F7FA;border-radius:8px;padding:3px;width:fit-content}
+.tab{padding:5px 13px;border-radius:6px;font-size:12px;font-weight:500;color:#6B7280;cursor:pointer;border:none;background:none;transition:all .15s;white-space:nowrap}
+.tab:hover{color:#1A1D23}.tab.active{background:#fff;color:#EE4D2D;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.b-green{background:#ECFDF3;color:#027A48}.b-red{background:#FEF3F2;color:#B42318}.b-yellow{background:#FFFAEB;color:#B54708}
+.b-blue{background:#EFF8FF;color:#175CD3}.b-gray{background:#F2F4F7;color:#344054}.b-orange{background:#FFF6ED;color:#C4320A}
+.alert{padding:10px 14px;border-radius:8px;font-size:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.a-w{background:#FFFAEB;border:1px solid #FEF0C7;color:#B54708}.a-ok{background:#ECFDF3;border:1px solid #A9EFC5;color:#027A48}
+.a-i{background:#EFF8FF;border:1px solid #B2DDFF;color:#175CD3}.a-e{background:#FEF3F2;border:1px solid #FECDCA;color:#B42318}
+.ov{display:none;position:fixed;inset:0;background:rgba(16,24,40,.5);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
 .ov.open{display:flex}
-.modal{background:#fff;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,0.18);width:100%;max-width:640px;max-height:92vh;overflow-y:auto;padding:22px;animation:su .16s ease}
-.modal-lg{max-width:900px}
-@keyframes su{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
-.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.mttl{font-size:16px;font-weight:700;color:#1A202C}
-
-/* TABS */
-.tabs{display:flex;gap:3px;background:#F7FAFC;padding:3px;border-radius:7px;border:1px solid #E2E8F0;width:fit-content;margin-bottom:13px}
-.tab{padding:5px 12px;border-radius:5px;font-size:12px;font-weight:600;border:none;background:transparent;color:#718096;cursor:pointer;transition:all .12s;white-space:nowrap}
-.tab.active{background:#fff;color:#4A6CF7;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-
-/* ALERTS */
-.alert{padding:9px 13px;border-radius:7px;font-size:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
-.a-w{background:#FFFBEB;border:1px solid #FCD34D;color:#92400E}
-.a-ok{background:#F0FFF4;border:1px solid #9AE6B4;color:#276749}
-.a-i{background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF}
-
-/* CALC BOX */
-.cbox{background:#F7FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:13px;margin-top:13px;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
-.cl{font-size:9px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:2px}
-.cv{font-size:16px;font-weight:700;color:#1A202C}
-
-/* PRODUCT CARDS for anuncios */
-.prod-card{border:1px solid #E2E8F0;border-radius:9px;overflow:hidden;margin-bottom:12px;background:#fff;transition:box-shadow .14s}
-.prod-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.08)}
-.prod-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none;background:#FAFBFF;border-bottom:1px solid #E2E8F0}
-.prod-hd:hover{background:#F0F4FF}
-.prod-body{display:none;padding:0}
-.prod-body.open{display:block}
-
-/* PROJ */
-.pj-hd{display:grid;grid-template-columns:2fr 80px 80px 90px 90px 90px;gap:10px;padding:7px 0;border-bottom:2px solid #E2E8F0;font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.4px}
-.pj-row{display:grid;grid-template-columns:2fr 80px 80px 90px 90px 90px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #F0F4F8}
-.pj-row:last-child{border-bottom:none}
-
-/* INLINE EDIT */
-.ied{padding:4px 7px;border:1px solid #E2E8F0;border-radius:5px;font-size:12px;font-weight:600;color:#2D3748;background:#fff;width:80px;text-align:right;transition:border-color .12s}
-.ied:focus{outline:none;border-color:#4A6CF7;box-shadow:0 0 0 2px rgba(74,108,247,0.1)}
-
-/* PILL FAIXA LUCRO */
-.faixa{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700}
-.fa{background:#F0FFF4;color:#276749} /* alta */
-.fm{background:#FFFFF0;color:#975A16} /* media */
-.fb{background:#FFF5F5;color:#C53030} /* baixa */
-.fn{background:#F7FAFC;color:#4A5568} /* nula  */
-
-/* DOT */
-.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
-.d-g{background:#48C78E} .d-r{background:#FC5C7D} .d-y{background:#FFB400}
-
-/* TWO COL */
-.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:820px){.two{grid-template-columns:1fr}}
-
-/* SCROLL hide */
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#CBD5E0;border-radius:3px}
-
-/* CODE */
-.code{background:#1E2533;color:#CBD5E0;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;line-height:1.8;overflow-x:auto}
-.ck{color:#8BA8FA}.cs{color:#68D391}
-
-/* EMPTY */
-.empty{text-align:center;padding:32px 20px;color:#A0AEC0}
-.empty-i{font-size:26px;margin-bottom:6px}
-
-/* v3 additions */
-.raiz-card{border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;margin-bottom:14px;background:#fff}
-.raiz-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none;background:#FAFBFF;border-bottom:1px solid transparent;transition:all .12s}
-.raiz-hd.open{border-bottom-color:#E2E8F0;background:#EEF3FF}
-.raiz-hd:hover{background:#EEF3FF}
-.raiz-body{display:none}.raiz-body.open{display:block}
-.filho-row{display:flex;align-items:flex-start;gap:10px;padding:12px 14px 12px 28px;border-bottom:1px solid #F0F4F8}
-.filho-row:last-child{border-bottom:none}.filho-row:hover{background:#FAFBFF}
-.anunc-chip{display:inline-flex;align-items:center;gap:5px;background:#F7FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:4px 9px;font-size:11px;margin:2px}
-.term-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;background:#EBF4FF;color:#2B6CB0;border:1px solid #BEE3F8;margin:2px}
-.term-tag button{background:none;border:none;color:#718096;cursor:pointer;font-size:11px;padding:0;line-height:1}.term-tag button:hover{color:#C53030}
-.kw-item{padding:9px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid #F0F4F8;transition:background .1s}
-.kw-item:last-child{border-bottom:none}.kw-item:hover{background:#EFF6FF}
-.kw-pct{font-size:14px;font-weight:800;min-width:38px;text-align:center}
-.kw-bar{background:#E2E8F0;border-radius:3px;height:3px;width:50px;margin-top:3px}
-.kw-bar-f{height:100%;border-radius:3px}
-.kw-tag{display:inline-block;background:#BEE3F8;color:#2B6CB0;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:600;margin:1px}
-.kw-miss{background:#FED7D7;color:#C53030;text-decoration:line-through}
-.drop-zone{border:2px dashed #CBD5E0;border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .15s;background:#FAFBFF}
-.drop-zone:hover,.drop-zone.drag{border-color:#4A6CF7;background:#EFF6FF}
-.drop-zone.ok{border-color:#48C78E;background:#F0FFF4}
-.imp-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #F0F4F8;font-size:12px}
-.imp-row:last-child{border-bottom:none}
-.bar-bg{background:#F0F4F8;border-radius:4px;height:6px;overflow:hidden;margin-top:3px}
-.bar-fill{height:100%;border-radius:4px}
-
-/* CATÁLOGO CARDS */
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-.cat-card{background:#fff;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;transition:box-shadow .14s;display:flex;flex-direction:column}
-.cat-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.1)}
-.cat-img{height:150px;background:#F7FAFC;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;position:relative}
-.cat-img img{width:100%;height:100%;object-fit:cover}
-.cat-img-edit{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:5px;padding:3px 7px;font-size:10px;cursor:pointer;font-weight:600}
-.cat-body{padding:12px;flex:1;display:flex;flex-direction:column;gap:5px}
-.cat-name{font-size:13px;font-weight:700;color:#1A202C;line-height:1.3}
-.cat-price{font-size:16px;font-weight:800;color:#4A6CF7}
-
-/* COLLAPSIBLE REPORT SECTION */
-.rel-section{border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;margin-bottom:14px;background:#fff}
-.rel-section-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;user-select:none;background:#FAFBFF;transition:background .12s}
-.rel-section-hd:hover{background:#EEF3FF}
-.rel-section-hd.open{background:#EEF3FF;border-bottom:1px solid #E2E8F0}
-.rel-section-body{display:none;padding:14px 16px}
-.rel-section-body.open{display:block}
-.rel-section-arrow{font-size:11px;color:#A0AEC0;transition:transform .15s}
-.rel-section-hd.open .rel-section-arrow{transform:rotate(90deg)}
+.modal{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.18);width:min(620px,95vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column}
+.modal.lg{width:min(780px,95vw)}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #EAECF0;position:sticky;top:0;background:#fff;z-index:2;border-radius:16px 16px 0 0}
+.mttl{font-size:15px;font-weight:700;color:#1A1D23}
+.mbdy{padding:22px;flex:1}
+.mftr{padding:14px 22px;border-top:1px solid #EAECF0;display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:#fff;border-radius:0 0 16px 16px}
+.prod-card{border:1px solid #EAECF0;border-radius:12px;overflow:hidden;margin-bottom:10px;background:#fff;transition:all .15s}
+.prod-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:rgba(238,77,45,.2)}
+.prod-hd{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;gap:10px}
+.prod-hd-l{display:flex;align-items:center;gap:10px;min-width:0}
+.prod-nome{font-size:14px;font-weight:600;color:#1A1D23;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-sub{font-size:11px;color:#9DA4AE;margin-top:1px}
+.prod-hd-r{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.prod-kpi{text-align:right}
+.prod-kpi-l{font-size:9px;text-transform:uppercase;font-weight:600;color:#9DA4AE;letter-spacing:.4px}
+.prod-kpi-v{font-size:13px;font-weight:700;color:#1A1D23}
+.prod-rows{display:none;border-top:1px solid #F3F4F6}.prod-rows.open{display:block}
+.cbox{background:#F9FAFB;border:1px solid #EAECF0;border-radius:10px;padding:13px;margin-top:13px;display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px}
+.cl{font-size:9px;font-weight:700;color:#9DA4AE;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.cv{font-size:16px;font-weight:700;color:#1A1D23}
+.sku-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:12px}
+.sku-card{border:1px solid #EAECF0;border-radius:10px;overflow:hidden;background:#fff;text-align:center;padding-bottom:10px;transition:all .15s;cursor:pointer}
+.sku-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}.sku-card.low{border-color:#FECDCA}
+.sku-ph{width:100%;height:76px;background:#F9FAFB;display:flex;align-items:center;justify-content:center;font-size:22px}
+.sku-card img{width:100%;height:76px;object-fit:cover}
+.sku-lb{font-size:9px;font-weight:700;color:#9DA4AE;text-transform:uppercase;margin:6px 6px 2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sku-qty{font-size:18px;font-weight:700;color:#1A1D23;line-height:1}.sku-un{font-size:9px;color:#9DA4AE}
+.pdv-wrap{display:grid;grid-template-columns:1fr 340px;gap:14px;height:100%;min-height:0}
+.pdv-panel{background:#fff;border:1px solid #EAECF0;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.pdv-pnl-hd{padding:12px 16px;border-bottom:1px solid #EAECF0;font-size:13px;font-weight:600;color:#1A1D23;flex-shrink:0}
+.pdv-pnl-bd{flex:1;overflow-y:auto;padding:12px}
+.pdv-total-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:13px}
+.pdv-total-row.big{font-size:18px;font-weight:700;color:#1A1D23;padding:11px 0}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px}
+.pg-card{border:1px solid #EAECF0;border-radius:10px;overflow:hidden;background:#fff;cursor:pointer;transition:all .15s}
+.pg-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1);border-color:rgba(238,77,45,.3);transform:translateY(-1px)}
+.pg-card img{width:100%;height:115px;object-fit:cover}
+.pg-no-img{width:100%;height:115px;background:#F9FAFB;display:flex;align-items:center;justify-content:center;font-size:28px}
+.pg-card-body{padding:9px 10px}
+.pg-card-name{font-size:11px;font-weight:600;color:#1A1D23;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:3px}
+.pg-card-price{font-size:15px;font-weight:700;color:#EE4D2D}.pg-card-sku{font-size:9px;color:#9DA4AE;margin-top:2px}
+.sep{height:1px;background:#EAECF0;margin:14px 0}
+.text-muted{color:#9DA4AE;font-size:12px}.text-green{color:#027A48}.text-red{color:#B42318}.text-orange{color:#EE4D2D}
+.fw7{font-weight:700}.mono{font-variant-numeric:tabular-nums}
+.empty-state{text-align:center;padding:40px 20px;color:#9DA4AE}
+.empty-icon{font-size:30px;margin-bottom:10px}.empty-title{font-size:14px;font-weight:600;color:#4A5568;margin-bottom:5px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;background:#F2F4F7;color:#344054;white-space:nowrap;border:none;cursor:default}
+.chip.active{background:#FFF5F3;color:#EE4D2D}
+input[type=file]{display:none}
+.sw{position:relative}
+.sw input{padding-left:30px}
+.sw-ic{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#9DA4AE;font-size:13px;pointer-events:none}
+#kw-drop{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #EAECF0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;max-height:200px;overflow-y:auto;display:none}
+#kw-drop.open{display:block}
+.kw-item{padding:8px 12px;cursor:pointer;font-size:13px;color:#374151}.kw-item:hover{background:#F9FAFB}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#E2E6EA;border-radius:5px}::-webkit-scrollbar-thumb:hover{background:#CBD2D9}
+@media(max-width:768px){.tb{width:56px}.ni-lb,.tb-logo-text,.tb-sect{display:none}.ni{justify-content:center;padding:8px;margin:1px 6px}.tb-brand{justify-content:center;padding:0 12px}.tb-colbtn{display:none}.page{padding:14px}.kpig{grid-template-columns:1fr 1fr}.pdv-wrap{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- TOP NAV -->
-<nav class="topnav">
-  <div class="topnav-brand">
-    <div class="sb-logo">
-      <div class="sb-ico">D</div>
-      <span>DL Gestão</span>
-      <span class="sb-sub">ERP v3.0</span>
+  <!-- SIDEBAR -->
+  <div class="tb" id="sidebar">
+    <div class="tb-brand">
+      <div class="tb-logo-icon">DL</div>
+      <div class="tb-logo-text">DL Gestão <span class="tb-logo-sub">ERP v3.0</span></div>
+      <button class="tb-colbtn" onclick="toggleSidebar()">&#8249;</button>
     </div>
-    <div class="topnav-right">
-      <span id="fb-st" style="color:#FFB400">● Carregando...</span>
+    <div class="tb-nav">
+      <div class="tb-sect">Principal</div>
+      <div class="ni active" onclick="nav('dashboard',this)"><span class="ni-ic">&#9635;</span><span class="ni-lb">Dashboard</span></div>
+      <div class="ni" onclick="nav('anuncios',this)"><span class="ni-ic">&#9672;</span><span class="ni-lb">Anúncios</span></div>
+      <div class="ni" onclick="nav('produtos',this)"><span class="ni-ic">&#9633;</span><span class="ni-lb">Estoque</span></div>
+      <div class="ni" onclick="nav('vendas',this)"><span class="ni-ic">&#9685;</span><span class="ni-lb">Vendas</span></div>
+      <div class="ni" onclick="nav('pdv',this)"><span class="ni-ic">&#128722;</span><span class="ni-lb">PDV</span></div>
+      <div class="ni" onclick="nav('crm',this)"><span class="ni-ic">&#128101;</span><span class="ni-lb">CRM</span></div>
+      <div class="tb-sect">Ferramentas</div>
+      <div class="ni" onclick="nav('precificacao',this)"><span class="ni-ic">&#9678;</span><span class="ni-lb">Precificação</span></div>
+      <div class="ni" onclick="nav('projecao',this)"><span class="ni-ic">&#9719;</span><span class="ni-lb">Projeção</span></div>
+      <div class="ni" onclick="nav('relatorios',this)"><span class="ni-ic">&#9707;</span><span class="ni-lb">Relatórios</span></div>
+      <div class="ni" onclick="nav('catalogo',this)"><span class="ni-ic">&#128203;</span><span class="ni-lb">Catálogo</span></div>
+      <div class="tb-sect">Sistema</div>
+      <div class="ni" onclick="nav('raiz',this)"><span class="ni-ic">&#9633;</span><span class="ni-lb">Raiz</span></div>
+      <div class="ni" onclick="nav('config',this)"><span class="ni-ic">&#8853;</span><span class="ni-lb">Config</span></div>
+    </div>
+    <div class="tb-footer">
+      <div class="fb-status" id="fb-st"><div class="fb-dot" id="fb-dot"></div><span id="fb-st-txt">Conectando...</span></div>
     </div>
   </div>
-  <div class="topnav-menu">
-    <div class="ni active" onclick="nav('dashboard',this)"><span class="ni-ic">⊞</span> Dashboard</div>
-    <div class="topnav-sep"></div>
-    <div class="ni" onclick="nav('raiz',this)"><span class="ni-ic">⊟</span> Raiz</div>
-    <div class="ni" onclick="nav('produtos',this)"><span class="ni-ic">⊡</span> Estoque</div>
-    <div class="topnav-sep"></div>
-    <div class="ni" onclick="nav('anuncios',this)"><span class="ni-ic">◈</span> Anúncios</div>
-    <div class="ni" onclick="nav('vendas',this)"><span class="ni-ic">◉</span> Vendas</div>
-    <div class="ni" onclick="nav('pdv',this)"><span class="ni-ic">🛒</span> PDV</div>
-    <div class="ni" onclick="nav('crm',this)"><span class="ni-ic">👥</span> CRM</div>
-    <div class="topnav-sep"></div>
-    <div class="ni" onclick="nav('precificacao',this)"><span class="ni-ic">◎</span> Precificação</div>
-    <div class="ni" onclick="nav('projecao',this)"><span class="ni-ic">◷</span> Projeção</div>
-    <div class="topnav-sep"></div>
-    <div class="ni" onclick="nav('relatorios',this)"><span class="ni-ic">◫</span> Relatórios</div>
-    <div class="ni" onclick="nav('catalogo',this)"><span class="ni-ic">📋</span> Catálogo</div>
-    <div class="topnav-sep"></div>
-    <div class="ni" onclick="nav('config',this)"><span class="ni-ic">⊕</span> Config</div>
-  </div>
-</nav>
 
-<!-- MAIN -->
-<div class="main">
-<div class="tb">
-  <div class="tb-title" id="ptitle">Dashboard</div>
-  <div class="tb-right">
-    <div style="text-align:right;line-height:1.3"><div id="tclock" style="font-size:13px;font-weight:700;color:#2D3748;font-variant-numeric:tabular-nums"></div><div id="tdate" style="font-size:10px;color:#A0AEC0"></div></div>
-    <button class="btn btn-p btn-sm" onclick="openM('m-calc-rapida')" title="Calculadora Rápida de Preço">🧮 Calc. Rápida</button>
-    <button class="btn btn-g btn-sm" onclick="expJSON()" title="Exportar banco de dados">⬇ Exportar BD</button>
-    <button class="btn btn-g btn-sm" onclick="document.getElementById('impf').click()">⬆ Importar</button>
-    <input type="file" id="impf" accept=".json" style="display:none" onchange="impJSON(event)">
-    <div class="av">DL</div>
-  </div>
-</div>
+  <!-- MAIN CONTENT -->
+  <div class="ct">
 
-<div class="ct">
-
-<!-- ===== DASHBOARD ===== -->
-<div id="page-dashboard" class="pg active">
-  <div class="kpig">
-    <div class="kpi kb"><div class="kpi-l">Valor Total Estoque</div><div class="kpi-v" id="d1">R$ —</div><div class="kpi-s" id="d1s">—</div></div>
-    <div class="kpi kg"><div class="kpi-l">Lucro Potencial</div><div class="kpi-v" id="d2">R$ —</div><div class="kpi-s">todo estoque vendido</div></div>
-    <div class="kpi ko"><div class="kpi-l">Anúncios Ativos</div><div class="kpi-v" id="d3">—</div><div class="kpi-s" id="d3s">—</div></div>
-    <div class="kpi kr"><div class="kpi-l">Estoque Baixo</div><div class="kpi-v" id="d4">—</div><div class="kpi-s">≤10 unidades</div></div>
-    <div class="kpi kp"><div class="kpi-l">Lucro Projetado/30d</div><div class="kpi-v" id="d5">R$ —</div><div class="kpi-s">com vendas atuais</div></div>
-  </div>
-
-  <!-- SKUs com foto e quantidade -->
-  <div class="card" style="margin-bottom:16px">
-    <div class="sh"><div class="sh-t">📦 Estoque por SKU</div><div class="sh-s">Foto + quantidade atual</div></div>
-    <div id="d-sku-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px"></div>
-  </div>
-
-  <div class="two" style="margin-bottom:16px">
-    <div class="card"><div class="sh"><div class="sh-t">🏆 Top por Lucro/Un</div></div><div id="d-top"></div></div>
-    <div class="card"><div class="sh"><div class="sh-t">🔥 Top Mais Vendidos</div></div><div id="d-top-vend"></div></div>
-  </div>
-
-  <div class="two" style="margin-bottom:16px">
-    <div class="card"><div class="sh"><div class="sh-t">⚠ Estoque Baixo ≤10un</div></div><div id="d-alrt"></div></div>
-    <div class="card"><div class="sh"><div class="sh-t">⏰ Promoções Expirando</div></div><div id="d-promo-exp"></div></div>
-  </div>
-
-  <div class="card">
-    <div class="sh"><div class="sh-t">😴 Produtos Sem Vendas</div><div class="sh-s">Sem nenhuma venda registrada</div></div>
-    <div id="d-sem-venda"></div>
-  </div>
-</div>
-
-<!-- ===== PRODUTOS & ESTOQUE ===== -->
-<div id="page-produtos" class="pg">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div><div style="font-size:16px;font-weight:700">Produtos &amp; Estoque</div><div class="muted" style="font-size:12px;margin-top:2px">Cadastro unificado de produto + controle de estoque</div></div>
-    <button class="btn btn-p" onclick="openM('m-prod')">+ Novo Produto</button>
-  </div>
-  <div class="kpig">
-    <div class="kpi kb"><div class="kpi-l">Custo Total</div><div class="kpi-v" id="pe1">R$ —</div></div>
-    <div class="kpi kg"><div class="kpi-l">Lucro Potencial</div><div class="kpi-v" id="pe2">R$ —</div></div>
-    <div class="kpi ko"><div class="kpi-l">Valor Conjunto</div><div class="kpi-v" id="pe3">R$ —</div></div>
-    <div class="kpi kr"><div class="kpi-l">Itens Cadastrados</div><div class="kpi-v" id="pe4">—</div></div>
-  </div>
-  <div class="tabs" id="ptabs">
-    <button class="tab active" onclick="fPE('TODOS',this)">Todos</button>
-    <button class="tab" onclick="fPE('EMPRESA',this)">Empresa</button>
-    <button class="tab" onclick="fPE('FULL',this)">Full ML</button>
-    <button class="tab" onclick="fPE('IMPORTACAO',this)">Importação</button>
-  </div>
-  <div class="tw"><table>
-    <thead><tr>
-      <th>SKU</th><th>Produto</th><th>Local</th><th>Tributação</th>
-      <th class="tr">Qtd</th><th class="tr">Custo Un</th><th class="tr">Total Custo</th>
-      <th class="tr">Lucro Un</th><th class="tr">Total Lucro</th><th class="tr">Conjunto</th>
-      <th>Status</th><th></th>
-    </tr></thead>
-    <tbody id="tb-pe"></tbody>
-  </table></div>
-</div>
-
-<!-- ===== ANÚNCIOS ===== -->
-<div id="page-anuncios" class="pg">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div><div style="font-size:16px;font-weight:700">Anúncios por Produto</div><div class="muted" style="font-size:12px;margin-top:2px">Clique no produto para ver todos os anúncios cadastrados</div></div>
-    <button class="btn btn-p" onclick="openM('m-anunc')">+ Novo Anúncio</button>
-  </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-    <div>
-      <div style="font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:4px">Canal</div>
-      <div class="tabs" id="atabs" style="margin-bottom:0">
-        <button class="tab active" onclick="fAn('TODOS',this)">Todos</button>
-        <button class="tab" onclick="fAn('TIKTOK',this)">TikTok</button>
-        <button class="tab" onclick="fAn('MERCADO LIVRE',this)">ML</button>
-        <button class="tab" onclick="fAn('SHOPEE',this)">Shopee</button>
-        <button class="tab" onclick="fAn('LOJA',this)">Loja</button>
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span id="ptitle">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <input type="file" id="impf" accept=".json" oninput="impJSON(this)">
+        <button class="btn btn-sm btn-g" onclick="openM('m-calc-rapida')">&#129518; Calc. Rápida</button>
+        <button class="btn btn-sm btn-g" onclick="expJSON()">&#8595; Exportar BD</button>
+        <button class="btn btn-sm btn-g" onclick="document.getElementById('impf').click()">&#8593; Importar</button>
+        <span id="tclock"></span>
+        <span id="tdate" style="display:none"></span>
       </div>
     </div>
-    <div>
-      <div style="font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:4px">Conta</div>
-      <div class="tabs" id="atabs-conta" style="margin-bottom:0">
-        <button class="tab active" onclick="fAnConta('TODOS',this)">Todas</button>
-        <button class="tab" onclick="fAnConta('DL',this)">DL</button>
-        <button class="tab" onclick="fAnConta('RAPOSA',this)">Raposa</button>
-        <button class="tab" onclick="fAnConta('MINEIRINHO',this)">Mineirinho</button>
-        <button class="tab" onclick="fAnConta('SHOPEE_DL',this)">Shopee DL</button>
-        <button class="tab" onclick="fAnConta('SHOPEE_MG',this)">Shopee MG</button>
-        <button class="tab" onclick="fAnConta('TIKTOK_DL',this)">TikTok DL</button>
-        <button class="tab" onclick="fAnConta('EMPREENDIMENTO',this)">Empreend.</button>
+
+    <!-- PAGE: DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="kpig">
+        <div class="kpi kb"><div class="kpi-l">Valor Total Estoque</div><div class="kpi-v" id="d1">R$ —</div><div class="kpi-s" id="d1s">— itens</div></div>
+        <div class="kpi kg"><div class="kpi-l">Lucro Potencial</div><div class="kpi-v" id="d2">R$ —</div><div class="kpi-s">todo estoque vendido</div></div>
+        <div class="kpi kp"><div class="kpi-l">Anúncios Ativos</div><div class="kpi-v" id="d3">—</div><div class="kpi-s" id="d3s">— canal(is)</div></div>
+        <div class="kpi ky"><div class="kpi-l">Estoque Baixo</div><div class="kpi-v" id="d4">—</div><div class="kpi-s">≤10 unidades</div></div>
+        <div class="kpi kt"><div class="kpi-l">Lucro Projetado/30D</div><div class="kpi-v" id="d5">R$ —</div><div class="kpi-s">com vendas atuais</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">📦 Estoque por SKU</span><span class="text-muted">Foto + quantidade atual</span></div>
+        <div class="sku-grid" id="d-sku-grid"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card"><div class="card-hd"><span class="card-title">🏆 Top por Lucro/Un</span></div><div id="d-top"></div></div>
+        <div class="card"><div class="card-hd"><span class="card-title">🔥 Top Mais Vendidos</span></div><div id="d-top-vend"></div></div>
+      </div>
+      <div id="d-alrt"></div>
+      <div id="d-promo-exp"></div>
+      <div id="d-sem-venda"></div>
+    </div>
+
+    <!-- PAGE: ESTOQUE -->
+    <div id="page-produtos" class="page">
+      <div class="sh">
+        <div><div class="sh-t">Produtos &amp; Estoque</div><div class="sh-s">Cadastro unificado de produto + controle de estoque</div></div>
+        <button class="btn btn-p btn-sm" onclick="openM('m-prod')">+ Novo Produto</button>
+      </div>
+      <div class="kpig">
+        <div class="kpi kb"><div class="kpi-l">Custo Total</div><div class="kpi-v" id="pe1">R$ —</div></div>
+        <div class="kpi kg"><div class="kpi-l">Lucro Potencial</div><div class="kpi-v" id="pe2">R$ —</div></div>
+        <div class="kpi kp"><div class="kpi-l">Valor Conjunto</div><div class="kpi-v" id="pe3">R$ —</div></div>
+        <div class="kpi ky"><div class="kpi-l">Itens Cadastrados</div><div class="kpi-v" id="pe4">—</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:1px solid #EAECF0;display:flex;align-items:center;gap:12px">
+          <div class="tabs" id="ptabs">
+            <button class="tab active" onclick="fPE('TODOS',this)">Todos</button>
+            <button class="tab" onclick="fPE('EMPRESA',this)">Empresa</button>
+            <button class="tab" onclick="fPE('FULL',this)">Full ML</button>
+            <button class="tab" onclick="fPE('IMPORTACAO',this)">Importação</button>
+          </div>
+        </div>
+        <div class="tw nb"><table>
+          <thead><tr>
+            <th>SKU</th><th>Produto</th><th>Local</th><th>Tributação</th>
+            <th class="tr">Qtd</th><th class="tr">Custo/Un</th><th class="tr">Total Custo</th>
+            <th class="tr">Lucro/Un</th><th class="tr">Total Lucro</th><th class="tr">Conjunto</th>
+            <th>Status</th><th style="width:60px"></th>
+          </tr></thead>
+          <tbody id="tb-pe"></tbody>
+        </table></div>
       </div>
     </div>
-  </div>
-  <div id="anunc-lista"></div>
-</div>
 
-<!-- ===== PRECIFICAÇÃO ===== -->
-<div id="page-precificacao" class="pg">
+    <!-- PAGE: ANÚNCIOS -->
+    <div id="page-anuncios" class="page">
+      <div class="sh">
+        <div><div class="sh-t">Anúncios por Produto</div><div class="sh-s">Clique no produto para ver todos os anúncios cadastrados</div></div>
+        <button class="btn btn-p btn-sm" onclick="openM('m-anunc')">+ Novo Anúncio</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;font-weight:700;color:#9DA4AE;text-transform:uppercase;letter-spacing:.6px">Canal</span>
+          <div class="tabs" id="atabs">
+            <button class="tab active" onclick="fAn('TODOS',this)">Todos</button>
+            <button class="tab" onclick="fAn('TIKTOK',this)">TikTok</button>
+            <button class="tab" onclick="fAn('MERCADO LIVRE',this)">ML</button>
+            <button class="tab" onclick="fAn('SHOPEE',this)">Shopee</button>
+            <button class="tab" onclick="fAn('LOJA',this)">Loja</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:10px;font-weight:700;color:#9DA4AE;text-transform:uppercase;letter-spacing:.6px">Conta</span>
+          <div class="tabs" id="atabs-conta">
+            <button class="tab active" onclick="fAnConta('TODOS',this)">Todas</button>
+            <button class="tab" onclick="fAnConta('DL',this)">DL</button>
+            <button class="tab" onclick="fAnConta('RAPOSA',this)">Raposa</button>
+            <button class="tab" onclick="fAnConta('MINEIRINHO',this)">Mineirinho</button>
+            <button class="tab" onclick="fAnConta('SHOPEE DL',this)">Shopee DL</button>
+            <button class="tab" onclick="fAnConta('SHOPEE MG',this)">Shopee MG</button>
+            <button class="tab" onclick="fAnConta('TIKTOK DL',this)">TikTok DL</button>
+            <button class="tab" onclick="fAnConta('EMPREENDIMENTO',this)">Empreend.</button>
+          </div>
+        </div>
+      </div>
+      <div id="anunc-lista"></div>
+    </div>
+
+    <!-- PAGE: VENDAS -->
+    <div id="page-vendas" class="page">
+      <div class="sh">
+        <div><div class="sh-t">Vendas</div></div>
+        <button class="btn btn-p btn-sm" onclick="openM('m-venda')">+ Nova Venda</button>
+      </div>
+      <div class="kpig">
+        <div class="kpi kb"><div class="kpi-l">Total Vendido</div><div class="kpi-v" id="vd1">R$ —</div><div class="kpi-s" id="vd1s"></div></div>
+        <div class="kpi kg"><div class="kpi-l">Lucro Total</div><div class="kpi-v" id="vd2">R$ —</div></div>
+        <div class="kpi kp"><div class="kpi-l">Qtd Vendas</div><div class="kpi-v" id="vd3">—</div><div class="kpi-s" id="vd3s"></div></div>
+        <div class="kpi ky"><div class="kpi-l">Ticket Médio</div><div class="kpi-v" id="vd4">R$ —</div></div>
+        <div class="kpi kt"><div class="kpi-l">Vendas/Dia</div><div class="kpi-v" id="vd-vpd">—</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tw nb"><table>
+          <thead><tr><th>Data</th><th>Produto</th><th>Canal</th><th>Cliente</th><th class="tr">Qtd</th><th class="tr">Preço</th><th class="tr">Lucro</th></tr></thead>
+          <tbody id="tb-vend-rec"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div id="page-precificacao" class="pg">
   <div style="margin-bottom:16px"><div style="font-size:16px;font-weight:700">Calculadora de Precificação</div><div class="muted" style="font-size:12px;margin-top:2px">Simples Nacional: Imposto = Preço × Alíquota% (faturamento bruto) | Custo Canal = Preço×Taxa% + Taxa Fixa + Frete | Lucro = Preço − Custo Canal − Imposto − Custo</div></div>
   <div class="card" style="margin-bottom:16px">
     <div class="sh"><div class="sh-t">Calculadora</div></div>
@@ -516,9 +462,7 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
     </table></div>
   </div>
 </div>
-
-<!-- ===== PROJEÇÃO ===== -->
-<div id="page-projecao" class="pg">
+    <div id="page-projecao" class="pg">
   <div style="margin-bottom:16px"><div style="font-size:16px;font-weight:700">Projeção de Lucro</div><div class="muted" style="font-size:12px;margin-top:2px">Projeção integrada com estoque — veja quantos dias de estoque restam</div></div>
   <div class="card" style="margin-bottom:14px">
     <div class="fgrid" style="max-width:420px">
@@ -542,9 +486,7 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
     <div id="pj-lista"><div class="empty"><div class="empty-i">📈</div><p>Cadastre anúncios</p></div></div>
   </div>
 </div>
-
-<!-- ===== RELATÓRIOS ===== -->
-<div id="page-relatorios" class="pg">
+    <div id="page-relatorios" class="pg">
   <div style="margin-bottom:16px"><div style="font-size:16px;font-weight:700">Relatórios &amp; Análises</div><div class="muted" style="font-size:12px;margin-top:2px">Clique em cada seção para expandir</div></div>
 
   <!-- KPIs rápidos - sempre visível -->
@@ -616,9 +558,7 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
     </div>
   </div>
 </div>
-
-<!-- ===== CONFIG ===== -->
-<div id="page-config" class="pg">
+    <div id="page-config" class="pg">
   <div style="margin-bottom:16px"><div style="font-size:16px;font-weight:700">Configurações</div></div>
 
   <!-- PAGAMENTO PIX -->
@@ -678,10 +618,7 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
     </div>
   </div>
 </div>
-
-
-<!-- PAGE: RAIZ -->
-<div id="page-raiz" class="pg">
+    <div id="page-raiz" class="pg">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <div>
       <div style="font-size:16px;font-weight:700">Produtos Raiz</div>
@@ -697,39 +634,7 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
   </div>
   <div id="raiz-lista"><div class="empty"><div class="empty-i">📦</div><p>Nenhuma raiz. Clique em + Nova Raiz.</p></div></div>
 </div>
-
-<!-- PAGE: VENDAS -->
-<div id="page-vendas" class="pg">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div><div style="font-size:16px;font-weight:700">Registro de Vendas</div><div class="muted" style="font-size:12px;margin-top:2px">Importe CSV do marketplace ou registre manualmente</div></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-o" onclick="openM('m-import-csv')">⬆ Importar CSV</button>
-      <button class="btn btn-p" onclick="openM('m-venda')">+ Registrar Venda</button>
-    </div>
-  </div>
-  <div class="kpig">
-    <div class="kpi kb"><div class="kpi-l">Vendas Hoje</div><div class="kpi-v" id="vd1">—</div><div class="kpi-s" id="vd1s">—</div></div>
-    <div class="kpi kg"><div class="kpi-l">Lucro Real Hoje</div><div class="kpi-v" id="vd2">R$ —</div></div>
-    <div class="kpi ko"><div class="kpi-l">Vendas no Mês</div><div class="kpi-v" id="vd3">—</div><div class="kpi-s" id="vd3s">—</div></div>
-    <div class="kpi kp"><div class="kpi-l">Lucro Real no Mês</div><div class="kpi-v" id="vd4">R$ —</div></div>
-  </div>
-  <div class="two" style="margin-bottom:16px">
-    <div class="card">
-      <div class="sh"><div class="sh-t">VPD Real vs Projetado</div><div class="sh-s">Últimos 30 dias</div></div>
-      <div id="vd-vpd"><div class="empty"><div class="empty-i">📊</div><p>Importe vendas para ver o VPD real</p></div></div>
-    </div>
-    <div class="card">
-      <div class="sh"><div class="sh-t">Vendas Recentes</div></div>
-      <div class="tw nb"><table>
-        <thead><tr><th>Produto</th><th>Canal</th><th class="tr">Qtd</th><th class="tr">Preço</th><th class="tr">Lucro</th><th>Data</th></tr></thead>
-        <tbody id="tb-vend-rec"></tbody>
-      </table></div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== CATÁLOGO ===== -->
-<div id="page-catalogo" class="pg">
+    <div id="page-catalogo" class="pg">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
     <div>
       <div style="font-size:16px;font-weight:700">📋 Catálogo de Produtos</div>
@@ -745,9 +650,7 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
   </div>
   <div id="cat-grid" class="cat-grid"></div>
 </div>
-
-<!-- PAGE: PDV -->
-<div id="page-pdv" class="pg">
+    <div id="page-pdv" class="pg">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <div><div style="font-size:16px;font-weight:700">🛒 Ponto de Venda</div><div class="muted" style="font-size:12px;margin-top:2px">Clique nos produtos para adicionar ao carrinho.</div></div>
     <select id="pdv-canal" style="padding:6px 10px;border:1px solid #E2E8F0;border-radius:7px;font-size:12px;outline:none">
@@ -824,9 +727,7 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
     </div>
   </div>
 </div>
-
-<!-- PAGE: CRM -->
-<div id="page-crm" class="pg">
+    <div id="page-crm" class="pg">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
     <div><div style="font-size:16px;font-weight:700">👥 CRM — Clientes</div><div class="muted" style="font-size:12px;margin-top:2px">Cadastro completo, histórico de compras, recorrência e fidelidade</div></div>
     <button class="btn btn-p" onclick="openM('m-cli-novo');pdvCliNovo()">+ Novo Cliente</button>
@@ -849,12 +750,10 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
   <div id="crm-lista"></div>
 </div>
 
-</div><!-- /ct -->
-</div><!-- /main -->
+  </div><!-- /ct -->
 </div><!-- /app -->
 
-
-<!-- MODAL: PRODUTO -->
+<!-- MODALS -->
 <div class="ov" id="m-prod">
   <div class="modal">
     <div class="mhd"><div class="mttl" id="mp-title">Novo Produto / Estoque</div><button class="btn btn-g btn-xs" onclick="closeM('m-prod')">✕</button></div>
@@ -903,8 +802,6 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
     </div>
   </div>
 </div>
-
-<!-- MODAL: ANÚNCIO (novo / editar) -->
 <div class="ov" id="m-anunc">
   <div class="modal">
     <div class="mhd"><div class="mttl" id="ma-title">Novo Anúncio</div><button class="btn btn-g btn-xs" onclick="closeM('m-anunc')">✕</button></div>
@@ -1025,8 +922,6 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
     </div>
   </div>
 </div>
-
-<!-- MODAL: CALCULADORA RÁPIDA -->
 <div class="ov" id="m-calc-rapida">
   <div class="modal" style="max-width:700px">
     <div class="mhd">
@@ -1134,8 +1029,164 @@ tr:last-child td{border-bottom:none} tbody tr:hover td{background:#FAFBFF}
     </div>
   </div>
 </div>
+<div class="ov" id="m-raiz">
+  <div class="modal">
+    <div class="mhd"><div class="mttl" id="mr-title">Nova Raiz de Produto</div><button class="btn btn-g btn-xs" onclick="closeM('m-raiz')">✕</button></div>
+    <input type="hidden" id="mr-eid">
+    <div class="alert a-i" style="margin-bottom:14px">A raiz é o produto genérico (ex: <strong>Trava</strong>). As variações são os filhos (ex: Kit 2, Kit 3). Os anúncios ficam dentro de cada variação.</div>
+    <div class="fgrid">
+      <div class="fg"><label>Nome da Raiz *</label><input id="mr-nome" placeholder="ex: Trava, Caneta Francesinha"></div>
+      <div class="fg"><label>Categoria</label><input id="mr-cat" placeholder="ex: Segurança, Papelaria"></div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="fg" style="margin-bottom:8px">
+        <label>Palavras-chave de identificação</label>
+        <input id="mr-kw-new" placeholder="Digite um termo e pressione Enter (ex: trava, porta, janela)" onkeydown="addTermRaiz(event)">
+        <div style="font-size:10px;color:#718096;margin-top:3px">Usados para identificar este produto automaticamente ao importar CSV ou colar título de anúncio</div>
+      </div>
+      <div id="mr-terms"></div>
+    </div>
+    <div class="dvd"></div>
+    <div style="display:flex;gap:9px;justify-content:flex-end">
+      <button class="btn btn-g" onclick="closeM('m-raiz')">Cancelar</button>
+      <button class="btn btn-p" onclick="sRaiz()">Salvar Raiz</button>
+    </div>
+  </div>
+</div>
+<div class="ov" id="m-venda">
+  <div class="modal" style="max-width:500px">
+    <div class="mhd"><div class="mttl">Registrar Venda</div><button class="btn btn-g btn-xs" onclick="closeM('m-venda')">✕</button></div>
+    <div class="fgrid">
+      <div class="fg"><label>Produto *</label><select id="mv-prod" onchange="mvAutoPreco()"><option value="">Selecione...</option></select></div>
+      <div class="fg"><label>Canal</label><select id="mv-canal"><option value="MERCADO LIVRE">Mercado Livre</option><option value="SHOPEE">Shopee</option><option value="TIKTOK">TikTok</option><option value="LOJA">Loja Física</option></select></div>
+      <div class="fg"><label>Quantidade</label><input type="number" id="mv-qtd" placeholder="1" min="1" value="1" oninput="calcVenda()"></div>
+      <div class="fg"><label>Preço Unitário (R$)</label><input type="number" id="mv-preco" placeholder="0.00" step="0.01" oninput="calcVenda()"></div>
+      <div class="fg"><label>Data</label><input type="date" id="mv-data"></div>
+      <div class="fg"><label>Descontar do Estoque</label><select id="mv-desc"><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+    </div>
+    <div id="mv-res" style="background:#F7FAFC;border:1px solid #E2E8F0;border-radius:7px;padding:10px;margin-top:10px;display:none">
+      <div style="display:flex;gap:16px">
+        <div><div class="cl">Lucro Total</div><div style="font-size:16px;font-weight:700" id="mvr-luc">—</div></div>
+        <div><div class="cl">Faturamento</div><div style="font-size:16px;font-weight:700" id="mvr-fat">—</div></div>
+      </div>
+    </div>
+    <div class="dvd"></div>
+    <div style="display:flex;gap:9px;justify-content:flex-end">
+      <button class="btn btn-g" onclick="closeM('m-venda')">Cancelar</button>
+      <button class="btn btn-p" onclick="sVenda()">Registrar</button>
+    </div>
+  </div>
+</div>
+<div class="ov" id="m-import-csv">
+  <div class="modal" style="max-width:680px">
+    <div class="mhd">
+      <div><div class="mttl">⬆ Importar CSV de Vendas</div><div style="font-size:11px;color:#718096;margin-top:2px">ML, Shopee ou TikTok — detecta e mapeia automaticamente pelo nome do produto</div></div>
+      <button class="btn btn-g btn-xs" onclick="closeM('m-import-csv')">✕</button>
+    </div>
+    <div class="tabs" id="csv-tabs">
+      <button class="tab active" onclick="csvTab('ml',this)">Mercado Livre</button>
+      <button class="tab" onclick="csvTab('shopee',this)">Shopee</button>
+      <button class="tab" onclick="csvTab('tiktok',this)">TikTok Shop</button>
+    </div>
+    <div id="csv-inst" style="background:#F7FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 13px;font-size:12px;color:#4A5568;margin-bottom:12px;line-height:1.7"></div>
+    <div class="drop-zone" id="csv-drop" onclick="document.getElementById('csv-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="csvDrop(event)">
+      <div style="font-size:24px;margin-bottom:6px">📂</div>
+      <div style="font-weight:600;font-size:13px;color:#2D3748">Arraste o arquivo CSV aqui ou clique para selecionar</div>
+      <div style="font-size:11px;color:#A0AEC0;margin-top:4px">Formatos: .csv, .txt (separado por vírgula ou ponto-e-vírgula)</div>
+    </div>
+    <input type="file" id="csv-file" accept=".csv,.txt" style="display:none" onchange="csvFileSelected(event)">
+    <div id="csv-preview" style="display:none">
+      <div id="csv-status" style="margin:10px 0;font-size:13px;font-weight:600"></div>
+      <div style="background:#F7FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px;max-height:200px;overflow-y:auto" id="csv-rows"></div>
+      <div id="csv-warn" style="margin-top:8px;font-size:12px;color:#C53030;font-weight:600"></div>
+    </div>
+    <div class="dvd"></div>
+    <div style="display:flex;gap:9px;justify-content:flex-end">
+      <button class="btn btn-g" onclick="closeM('m-import-csv')">Cancelar</button>
+      <button class="btn btn-p" id="csv-btn" style="display:none" onclick="confirmCSV()">Confirmar Importação</button>
+    </div>
+  </div>
+</div>
+<div class="ov" id="m-cli-novo">
+  <div class="modal" style="max-width:580px">
+    <div class="mhd"><div class="mttl" id="mcli-title">👤 Novo Cliente</div><button class="btn btn-g btn-xs" onclick="closeM('m-cli-novo')">✕</button></div>
+    <input type="hidden" id="mcli-eid">
+    <div style="font-size:11px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:10px">Dados Pessoais</div>
+    <div class="fgrid" style="margin-bottom:12px">
+      <div class="fg" style="grid-column:1/-1"><label>Nome Completo *</label><input id="mcli-nome" placeholder="ex: Maria Costa"></div>
+      <div class="fg"><label>WhatsApp *</label><input id="mcli-wpp" placeholder="(31) 99999-0000"></div>
+      <div class="fg"><label>CPF</label><input id="mcli-cpf" placeholder="000.000.000-00"></div>
+      <div class="fg"><label>Email</label><input id="mcli-email" placeholder="email@exemplo.com" type="email"></div>
+      <div class="fg"><label>Data de Nascimento</label><input id="mcli-nasc" type="date"></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:10px">Endereço</div>
+    <div class="fgrid" style="margin-bottom:12px">
+      <div class="fg" style="grid-column:1/-1"><label>Endereço</label><input id="mcli-end" placeholder="Rua, número, bairro"></div>
+      <div class="fg"><label>Cidade</label><input id="mcli-cidade" placeholder="ex: Perdões"></div>
+      <div class="fg"><label>Estado</label><input id="mcli-estado" placeholder="MG"></div>
+      <div class="fg"><label>CEP</label><input id="mcli-cep" placeholder="37000-000"></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:10px">Perfil do Cliente</div>
+    <div class="fgrid" style="margin-bottom:12px">
+      <div class="fg"><label>Forma preferida de compra</label>
+        <select id="mcli-forma"><option value="Presencial">Presencial / Balcão</option><option value="WhatsApp">WhatsApp</option><option value="Misto">Misto</option></select>
+      </div>
+      <div class="fg"><label>Frequência de compra</label>
+        <select id="mcli-freq"><option value="">Não definida</option><option value="Semanal">Semanal</option><option value="Quinzenal">Quinzenal</option><option value="Mensal">Mensal</option><option value="Eventual">Eventual</option></select>
+      </div>
+      <div class="fg"><label>Saldo de Crédito (R$)</label><input type="number" id="mcli-saldo" placeholder="0.00" step="0.01" value="0"></div>
+      <div class="fg"><label>Como nos conheceu</label><input id="mcli-origem" placeholder="ex: Indicação, Instagram"></div>
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>Interesses / Produtos que gosta</label>
+      <input id="mcli-gosto" placeholder="ex: canetas artísticas, peças automotivas, artesanato">
+    </div>
+    <div class="fg" style="margin-bottom:14px">
+      <label>Observações / Notas</label>
+      <textarea id="mcli-notas" rows="2" placeholder="Notas livres sobre o cliente..." style="padding:7px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;resize:vertical;outline:none"></textarea>
+    </div>
+    <div style="display:flex;gap:9px;justify-content:flex-end">
+      <button class="btn btn-g" onclick="closeM('m-cli-novo')">Cancelar</button>
+      <button class="btn btn-p" onclick="sCli()">Salvar Cliente</button>
+    </div>
+  </div>
+</div>
+<div class="ov" id="m-cupom">
+  <div class="modal" style="max-width:480px">
+    <div class="mhd">
+      <div><div class="mttl">🧾 Comprovante da Venda</div><div style="font-size:11px;color:#718096;margin-top:2px">Imprima, salve ou envie pelo WhatsApp</div></div>
+      <button class="btn btn-g btn-xs" onclick="closeM('m-cupom')">✕</button>
+    </div>
+    <div class="tabs" style="margin-bottom:12px">
+      <button class="tab active" onclick="cupomTab('cupom',this)">Cupom</button>
+      <button class="tab" onclick="cupomTab('invoice',this)">Invoice</button>
+    </div>
+    <div id="cupom-content"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-p" onclick="cupomImprimir()" style="flex:1;justify-content:center">🖨 Imprimir</button>
+      <button class="btn btn-g" onclick="cupomWhatsApp()" style="flex:1;justify-content:center">💬 WhatsApp</button>
+      <button class="btn btn-g" onclick="closeM('m-cupom')" style="flex:1;justify-content:center">Fechar</button>
+    </div>
+  </div>
+</div>
 
 <script>
+// SIDEBAR TOGGLE
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const col=sb.classList.toggle('collapsed');
+  localStorage.setItem('dl_sidebar_collapsed',col?'1':'0');
+  const btn=sb.querySelector('.tb-colbtn');
+  if(btn)btn.innerHTML=col?'&#8250;':'&#8249;';
+}
+(function(){
+  const c=localStorage.getItem('dl_sidebar_collapsed');
+  if(c==='1'){
+    const sb=document.getElementById('sidebar');
+    if(sb){sb.classList.add('collapsed');const btn=sb.querySelector('.tb-colbtn');if(btn)btn.innerHTML='&#8250;';}
+  }
+})();
+
 window._R={};window._P={};window._E={};window._A={};window._V={};window._C={};
 let _fPE='TODOS',_fAN='TODOS',_fPC='TODOS';
 
@@ -3373,158 +3424,7 @@ function renderAll(){
 
 // Catalog page exists check - add if missing
 
+
 </script>
-
-<!-- MODAL: RAIZ -->
-<div class="ov" id="m-raiz">
-  <div class="modal">
-    <div class="mhd"><div class="mttl" id="mr-title">Nova Raiz de Produto</div><button class="btn btn-g btn-xs" onclick="closeM('m-raiz')">✕</button></div>
-    <input type="hidden" id="mr-eid">
-    <div class="alert a-i" style="margin-bottom:14px">A raiz é o produto genérico (ex: <strong>Trava</strong>). As variações são os filhos (ex: Kit 2, Kit 3). Os anúncios ficam dentro de cada variação.</div>
-    <div class="fgrid">
-      <div class="fg"><label>Nome da Raiz *</label><input id="mr-nome" placeholder="ex: Trava, Caneta Francesinha"></div>
-      <div class="fg"><label>Categoria</label><input id="mr-cat" placeholder="ex: Segurança, Papelaria"></div>
-    </div>
-    <div style="margin-top:12px">
-      <div class="fg" style="margin-bottom:8px">
-        <label>Palavras-chave de identificação</label>
-        <input id="mr-kw-new" placeholder="Digite um termo e pressione Enter (ex: trava, porta, janela)" onkeydown="addTermRaiz(event)">
-        <div style="font-size:10px;color:#718096;margin-top:3px">Usados para identificar este produto automaticamente ao importar CSV ou colar título de anúncio</div>
-      </div>
-      <div id="mr-terms"></div>
-    </div>
-    <div class="dvd"></div>
-    <div style="display:flex;gap:9px;justify-content:flex-end">
-      <button class="btn btn-g" onclick="closeM('m-raiz')">Cancelar</button>
-      <button class="btn btn-p" onclick="sRaiz()">Salvar Raiz</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: VENDA MANUAL -->
-<div class="ov" id="m-venda">
-  <div class="modal" style="max-width:500px">
-    <div class="mhd"><div class="mttl">Registrar Venda</div><button class="btn btn-g btn-xs" onclick="closeM('m-venda')">✕</button></div>
-    <div class="fgrid">
-      <div class="fg"><label>Produto *</label><select id="mv-prod" onchange="mvAutoPreco()"><option value="">Selecione...</option></select></div>
-      <div class="fg"><label>Canal</label><select id="mv-canal"><option value="MERCADO LIVRE">Mercado Livre</option><option value="SHOPEE">Shopee</option><option value="TIKTOK">TikTok</option><option value="LOJA">Loja Física</option></select></div>
-      <div class="fg"><label>Quantidade</label><input type="number" id="mv-qtd" placeholder="1" min="1" value="1" oninput="calcVenda()"></div>
-      <div class="fg"><label>Preço Unitário (R$)</label><input type="number" id="mv-preco" placeholder="0.00" step="0.01" oninput="calcVenda()"></div>
-      <div class="fg"><label>Data</label><input type="date" id="mv-data"></div>
-      <div class="fg"><label>Descontar do Estoque</label><select id="mv-desc"><option value="sim">Sim</option><option value="nao">Não</option></select></div>
-    </div>
-    <div id="mv-res" style="background:#F7FAFC;border:1px solid #E2E8F0;border-radius:7px;padding:10px;margin-top:10px;display:none">
-      <div style="display:flex;gap:16px">
-        <div><div class="cl">Lucro Total</div><div style="font-size:16px;font-weight:700" id="mvr-luc">—</div></div>
-        <div><div class="cl">Faturamento</div><div style="font-size:16px;font-weight:700" id="mvr-fat">—</div></div>
-      </div>
-    </div>
-    <div class="dvd"></div>
-    <div style="display:flex;gap:9px;justify-content:flex-end">
-      <button class="btn btn-g" onclick="closeM('m-venda')">Cancelar</button>
-      <button class="btn btn-p" onclick="sVenda()">Registrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: IMPORTAR CSV -->
-<div class="ov" id="m-import-csv">
-  <div class="modal" style="max-width:680px">
-    <div class="mhd">
-      <div><div class="mttl">⬆ Importar CSV de Vendas</div><div style="font-size:11px;color:#718096;margin-top:2px">ML, Shopee ou TikTok — detecta e mapeia automaticamente pelo nome do produto</div></div>
-      <button class="btn btn-g btn-xs" onclick="closeM('m-import-csv')">✕</button>
-    </div>
-    <div class="tabs" id="csv-tabs">
-      <button class="tab active" onclick="csvTab('ml',this)">Mercado Livre</button>
-      <button class="tab" onclick="csvTab('shopee',this)">Shopee</button>
-      <button class="tab" onclick="csvTab('tiktok',this)">TikTok Shop</button>
-    </div>
-    <div id="csv-inst" style="background:#F7FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 13px;font-size:12px;color:#4A5568;margin-bottom:12px;line-height:1.7"></div>
-    <div class="drop-zone" id="csv-drop" onclick="document.getElementById('csv-file').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="csvDrop(event)">
-      <div style="font-size:24px;margin-bottom:6px">📂</div>
-      <div style="font-weight:600;font-size:13px;color:#2D3748">Arraste o arquivo CSV aqui ou clique para selecionar</div>
-      <div style="font-size:11px;color:#A0AEC0;margin-top:4px">Formatos: .csv, .txt (separado por vírgula ou ponto-e-vírgula)</div>
-    </div>
-    <input type="file" id="csv-file" accept=".csv,.txt" style="display:none" onchange="csvFileSelected(event)">
-    <div id="csv-preview" style="display:none">
-      <div id="csv-status" style="margin:10px 0;font-size:13px;font-weight:600"></div>
-      <div style="background:#F7FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px;max-height:200px;overflow-y:auto" id="csv-rows"></div>
-      <div id="csv-warn" style="margin-top:8px;font-size:12px;color:#C53030;font-weight:600"></div>
-    </div>
-    <div class="dvd"></div>
-    <div style="display:flex;gap:9px;justify-content:flex-end">
-      <button class="btn btn-g" onclick="closeM('m-import-csv')">Cancelar</button>
-      <button class="btn btn-p" id="csv-btn" style="display:none" onclick="confirmCSV()">Confirmar Importação</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- MODAL: NOVO/EDITAR CLIENTE -->
-<div class="ov" id="m-cli-novo">
-  <div class="modal" style="max-width:580px">
-    <div class="mhd"><div class="mttl" id="mcli-title">👤 Novo Cliente</div><button class="btn btn-g btn-xs" onclick="closeM('m-cli-novo')">✕</button></div>
-    <input type="hidden" id="mcli-eid">
-    <div style="font-size:11px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:10px">Dados Pessoais</div>
-    <div class="fgrid" style="margin-bottom:12px">
-      <div class="fg" style="grid-column:1/-1"><label>Nome Completo *</label><input id="mcli-nome" placeholder="ex: Maria Costa"></div>
-      <div class="fg"><label>WhatsApp *</label><input id="mcli-wpp" placeholder="(31) 99999-0000"></div>
-      <div class="fg"><label>CPF</label><input id="mcli-cpf" placeholder="000.000.000-00"></div>
-      <div class="fg"><label>Email</label><input id="mcli-email" placeholder="email@exemplo.com" type="email"></div>
-      <div class="fg"><label>Data de Nascimento</label><input id="mcli-nasc" type="date"></div>
-    </div>
-    <div style="font-size:11px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:10px">Endereço</div>
-    <div class="fgrid" style="margin-bottom:12px">
-      <div class="fg" style="grid-column:1/-1"><label>Endereço</label><input id="mcli-end" placeholder="Rua, número, bairro"></div>
-      <div class="fg"><label>Cidade</label><input id="mcli-cidade" placeholder="ex: Perdões"></div>
-      <div class="fg"><label>Estado</label><input id="mcli-estado" placeholder="MG"></div>
-      <div class="fg"><label>CEP</label><input id="mcli-cep" placeholder="37000-000"></div>
-    </div>
-    <div style="font-size:11px;font-weight:700;color:#718096;text-transform:uppercase;margin-bottom:10px">Perfil do Cliente</div>
-    <div class="fgrid" style="margin-bottom:12px">
-      <div class="fg"><label>Forma preferida de compra</label>
-        <select id="mcli-forma"><option value="Presencial">Presencial / Balcão</option><option value="WhatsApp">WhatsApp</option><option value="Misto">Misto</option></select>
-      </div>
-      <div class="fg"><label>Frequência de compra</label>
-        <select id="mcli-freq"><option value="">Não definida</option><option value="Semanal">Semanal</option><option value="Quinzenal">Quinzenal</option><option value="Mensal">Mensal</option><option value="Eventual">Eventual</option></select>
-      </div>
-      <div class="fg"><label>Saldo de Crédito (R$)</label><input type="number" id="mcli-saldo" placeholder="0.00" step="0.01" value="0"></div>
-      <div class="fg"><label>Como nos conheceu</label><input id="mcli-origem" placeholder="ex: Indicação, Instagram"></div>
-    </div>
-    <div class="fg" style="margin-bottom:12px">
-      <label>Interesses / Produtos que gosta</label>
-      <input id="mcli-gosto" placeholder="ex: canetas artísticas, peças automotivas, artesanato">
-    </div>
-    <div class="fg" style="margin-bottom:14px">
-      <label>Observações / Notas</label>
-      <textarea id="mcli-notas" rows="2" placeholder="Notas livres sobre o cliente..." style="padding:7px 10px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;resize:vertical;outline:none"></textarea>
-    </div>
-    <div style="display:flex;gap:9px;justify-content:flex-end">
-      <button class="btn btn-g" onclick="closeM('m-cli-novo')">Cancelar</button>
-      <button class="btn btn-p" onclick="sCli()">Salvar Cliente</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: CUPOM/INVOICE -->
-<div class="ov" id="m-cupom">
-  <div class="modal" style="max-width:480px">
-    <div class="mhd">
-      <div><div class="mttl">🧾 Comprovante da Venda</div><div style="font-size:11px;color:#718096;margin-top:2px">Imprima, salve ou envie pelo WhatsApp</div></div>
-      <button class="btn btn-g btn-xs" onclick="closeM('m-cupom')">✕</button>
-    </div>
-    <div class="tabs" style="margin-bottom:12px">
-      <button class="tab active" onclick="cupomTab('cupom',this)">Cupom</button>
-      <button class="tab" onclick="cupomTab('invoice',this)">Invoice</button>
-    </div>
-    <div id="cupom-content"></div>
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-      <button class="btn btn-p" onclick="cupomImprimir()" style="flex:1;justify-content:center">🖨 Imprimir</button>
-      <button class="btn btn-g" onclick="cupomWhatsApp()" style="flex:1;justify-content:center">💬 WhatsApp</button>
-      <button class="btn btn-g" onclick="closeM('m-cupom')" style="flex:1;justify-content:center">Fechar</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
